@@ -1,0 +1,44 @@
+---
+title: "vignette"
+output: html_document
+date: '2022-12-20'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+#library(causalCalibration)
+# Generate dataset used for calibration
+n <- 1000 
+W <- runif(n, -1 , 1)
+pA1 <- plogis(2*W)
+A <- rbinom(n, size = 1, pA1)
+# True CATE(W) = 1 + W
+CATE <- 1 + W
+EY0 <- W
+EY1 <- W + CATE
+Y <- rnorm(n, W + A * CATE, 0.3)
+
+# Initial uncalibrated predictor is a monotone transformation of the true CATE
+# Thus it is highly correlated with true CATE but predictions are not uncalibrated for CATE values
+tau <- exp(1+ W)
+plot(W, tau)
+
+calibrator <- causalCalibrate(tau, A, Y, EY1, EY0, pA1)
+plot(CATE,tau)
+
+plot(CATE,calibrator$tau_calibrated)
+
+# Uncalibrated predictor is incorrect for negative values of W
+tau <-  abs(W)
+ 
+
+calibrator <- causalCalibrate(tau, A, Y, EY1, EY0, pA1)
+plot(tau,CATE )
+plot(tau,calibrator$tau_calibrated)
+
+plot(CATE,calibrator$tau_calibrated)
+
+```

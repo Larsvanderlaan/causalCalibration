@@ -1,0 +1,77 @@
+---
+title: "vignette"
+output: html_document
+date: '2022-12-20'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+#library(causalCalibration)
+# Generate dataset used for calibration
+set.seed(123)
+n <- 1000
+W <- runif(n, -1 , 1)
+pA1 <- plogis(2*W)
+A <- rbinom(n, size = 1, pA1)
+# True CATE(W) = 1 + W
+CATE <- 1 + W
+EY0 <- W
+EY1 <- W + CATE
+Y <- rnorm(n, W + A * CATE, 0.3)
+
+# Initial uncalibrated predictor is a monotone transformation of the true CATE
+# Thus it is highly correlated with true CATE but predictions are not uncalibrated for CATE values
+tau <- exp(CATE)
+
+plot(W, tau)
+
+n <- 10000
+Wnew <- runif(n, -1 , 1)
+Wnew <- Wnew[abs(Wnew) <= 0.99]
+ 
+n <- length(Wnew)
+pA1new <- plogis(2*Wnew)
+Anew <- rbinom(n, size = 1, pA1new)
+# True CATE(W) = 1 + W
+CATE <- 1 + Wnew
+tau_new <- exp(CATE)
+
+
+calibrator <- causalCalibrate(tau, A, Y, EY1, EY0, pA1, tau_pred = tau_new)
+library(ggplot2)
+data <- data.frame(CATE = CATE, tau = tau_new, tau_cal =calibrator$tau_calibrated )
+ggplot(data, aes(x = tau, y = CATE)) +geom_point() + labs(x = "Predictor", y = "CATE values within predictions") + ggtitle("Uncalibrated predictor of CATE") 
+ ggsave("NoCalibrationCATE.pdf", width = 5, height = 3.5)
+ 
+ggplot(data, aes(x = tau_cal, y = CATE)) + geom_point() + labs(x = "Calibrated predictor", y = "CATE values within predictions") + ggtitle("Calibrated predictor of CATE")   + scale_x_continuous(limits = c(0, 2))
+
+ ggsave("CalibrationCATE.pdf", width = 5, height = 3.5)
+
+ 
+
+ 
+```
+
+
+
+```{r}
+
+calibrator <- causalCalibrate(tau, A, Y, EY1, EY0, pA1)
+plot(CATE,tau)
+
+plot(CATE,calibrator$tau_calibrated)
+
+# Uncalibrated predictor is incorrect for negative values of W
+tau <-  abs(W)
+ 
+
+calibrator <- causalCalibrate(tau, A, Y, EY1, EY0, pA1)
+plot(tau,CATE )
+plot(tau,calibrator$tau_calibrated)
+
+plot(CATE,calibrator$tau_calibrated)
+
+```
