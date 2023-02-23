@@ -1,7 +1,0 @@
-"0",""
-"0","# Uncalibrated predictor is incorrect for negative values of W"
-"0","tau <-  abs(W)"
-"0"," "
-"0",""
-"0","calibrator <- causalCalibrate(tau, A, Y, EY1, EY0, pA1)"
-"0","plot(tau,CATE )"

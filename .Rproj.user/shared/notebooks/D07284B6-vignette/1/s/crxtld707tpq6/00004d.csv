@@ -1,3 +1,0 @@
-"0",""
-"0","calibrator <- causalCalibrate(tau, A, Y, EY1, EY0, pA1)"
-"0","plot(CATE,tau)"

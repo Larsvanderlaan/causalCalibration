@@ -24,8 +24,8 @@ Y <- rnorm(n, W + A * CATE, 0.3)
 
 # Initial uncalibrated predictor is a monotone transformation of the true CATE
 # Thus it is highly correlated with true CATE but predictions are not uncalibrated for CATE values
-tau <- exp(CATE)
-
+tau <- exp(CATE) - 1
+ 
 plot(W, tau)
 
 n <- 10000
@@ -37,16 +37,38 @@ pA1new <- plogis(2*Wnew)
 Anew <- rbinom(n, size = 1, pA1new)
 # True CATE(W) = 1 + W
 CATE <- 1 + Wnew
-tau_new <- exp(CATE)
+tau_new <- exp(CATE) - 1
 
 
 calibrator <- causalCalibrate(tau, A, Y, EY1, EY0, pA1, tau_pred = tau_new)
 library(ggplot2)
-data <- data.frame(CATE = CATE, tau = tau_new, tau_cal =calibrator$tau_calibrated )
-ggplot(data, aes(x = tau, y = CATE)) +geom_point() + labs(x = "Predictor", y = "CATE values within predictions") + ggtitle("Uncalibrated predictor of CATE") 
+library(latex2exp)
+tau_cal <- calibrator$tau_calibrated
+data <- data.frame(W = Wnew, CATE = c(CATE, tau_new, tau_cal), type = rep(c("CATE", "Original", "Calibrated"), each = length(Wnew)  ))
+
+ggplot(data, aes(x = W, y = CATE, color = type)) + geom_line() + labs(x = TeX("$\\tau(w)$"), y =  TeX("$\\tau_0(w) = E[Y_1 - Y_0 | W = w]$") )+ ggtitle("Original predictor vs actual CATE values")   + scale_x_continuous( )    + theme_bw()
+  ggsave("CalibrationMonotone.pdf", width = 5, height = 3.5)
+  
+tau <-  1 + W +sin(5*W)
+tau_new <- 1 + Wnew+ sin(5*Wnew)
+
+
+calibrator <- causalCalibrate(tau, A, Y, EY1, EY0, pA1, tau_pred = tau_new)
+library(ggplot2)
+library(latex2exp)
+tau_cal <- calibrator$tau_calibrated
+data <- data.frame(W = Wnew, CATE = c(CATE, tau_new, tau_cal), type = rep(c("CATE", "Original", "Calibrated"), each = length(Wnew)  ))
+
+ggplot(data, aes(x = W, y = CATE, color = type)) + geom_line()  + ggtitle("Original predictor vs actual CATE values")   + scale_x_continuous( )    + theme_bw()
+  ggsave("CalibrationMonotone.pdf", width = 5, height = 3.5)
+
+```
+
+```{r}
  ggsave("NoCalibrationCATE.pdf", width = 5, height = 3.5)
+
  
-ggplot(data, aes(x = tau_cal, y = CATE)) + geom_point() + labs(x = "Calibrated predictor", y = "CATE values within predictions") + ggtitle("Calibrated predictor of CATE")   + scale_x_continuous(limits = c(0, 2))
+ggplot(data, aes(x = tau_cal, y = CATE)) + geom_point() + labs(x = TeX("$\\tau_n^*(w)$"), y =  TeX("$\\tau_0(w) = E[Y_1 - Y_0 | W = w]$") )+ ggtitle("Calibrated predictor vs actual CATE values")    + scale_x_continuous(limits = c(0, 2)) + geom_abline(slope=1, intercept=0, color = "red") + coord_flip()
 
  ggsave("CalibrationCATE.pdf", width = 5, height = 3.5)
 
