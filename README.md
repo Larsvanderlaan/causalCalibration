@@ -1,9 +1,11 @@
 # causalCalibration: Causal Isotonic Calibration for Heterogeneous Treatment Effects
 
-Provides R code implementing causal isotonic calibration (Algorithm 1) as described 
+Provides R code implementing causal isotonic calibration and cross-calibration as described 
 in the manuscript "Causal Isotonic Calibration for Heterogeneous Treatment Effects" by Lars van der Laan, Ernesto Ulloa, Marco Carone, and Alex Luedtke.
 
-Preprint can be found at this link: https://arxiv.org/abs/2302.14011
+Preprint describing methods and algorithms can be found at this link: https://arxiv.org/abs/2302.14011.
+
+See vignette for code examples.
 
 
 ```
