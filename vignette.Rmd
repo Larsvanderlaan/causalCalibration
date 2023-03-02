@@ -1,6 +1,8 @@
 ---
 title: "vignette"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 date: '2022-12-20'
 ---
 
@@ -8,8 +10,10 @@ date: '2022-12-20'
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+# Causal isotonic calibration
+
 ```{r}
-#library(causalCalibration)
+library(causalCalibration)
 # Generate dataset used for calibration
 set.seed(123)
 n <- 1000
@@ -46,9 +50,8 @@ library(latex2exp)
 tau_cal <- calibrator$tau_calibrated
 data <- data.frame(W = Wnew, CATE = c(CATE, tau_new, tau_cal), type = rep(c("CATE", "Original", "Calibrated"), each = length(Wnew)  ))
 
-ggplot(data, aes(x = W, y = CATE, color = type)) + geom_line() + labs(x = TeX("$\\tau(w)$"), y =  TeX("$\\tau_0(w) = E[Y_1 - Y_0 | W = w]$") )+ ggtitle("Original predictor vs actual CATE values")   + scale_x_continuous( )    + theme_bw()
-  ggsave("CalibrationMonotone.pdf", width = 5, height = 3.5)
-  
+ggplot(data, aes(x = W, y = CATE, color = type)) + geom_line() + labs(x = TeX("$\\tau(w)$"), y =  TeX("$\\tau_0(w) = E[Y_1 - Y_0 | W = w]$") )+ ggtitle("Effect of calibration")   + scale_x_continuous( )    + theme_bw()
+ 
 tau <-  1 + W +sin(5*W)
 tau_new <- 1 + Wnew+ sin(5*Wnew)
 
@@ -59,41 +62,188 @@ library(latex2exp)
 tau_cal <- calibrator$tau_calibrated
 data <- data.frame(W = Wnew, CATE = c(CATE, tau_new, tau_cal), type = rep(c("CATE", "Original", "Calibrated"), each = length(Wnew)  ))
 
-ggplot(data, aes(x = W, y = CATE, color = type)) + geom_line()  + ggtitle("Original predictor vs actual CATE values")   + scale_x_continuous( )    + theme_bw()
-  ggsave("CalibrationMonotone.pdf", width = 5, height = 3.5)
+ggplot(data, aes(x = W, y = CATE, color = type)) + geom_line()  + ggtitle("Effect of calibration")   + scale_x_continuous( )    + theme_bw()
+ 
+  
+  
+tau <-  1 + W  
+tau_new <- 1 + Wnew  
+
+
+calibrator <- causalCalibrate(tau, A, Y, EY1, EY0, pA1, tau_pred = tau_new)
+library(ggplot2)
+library(latex2exp)
+tau_cal <- calibrator$tau_calibrated
+data <- data.frame(W = Wnew, CATE = c(CATE, tau_new, tau_cal), type = rep(c("CATE", "Original", "Calibrated"), each = length(Wnew)  ))
+
+ggplot(data, aes(x = W, y = CATE, color = type)) + geom_line()  + ggtitle("Effect of calibration")   + scale_x_continuous( )    + theme_bw()
+  
+  
+  
+  
+        tau <-  1 + W + (W >= 0) * ( -0.8*   W)
+tau_new <- 1 + Wnew + (Wnew >= 0) * ( -0.8* Wnew)
+
+
+calibrator <- causalCalibrate(tau, A, Y, EY1, EY0, pA1, tau_pred = tau_new)
+library(ggplot2)
+library(latex2exp)
+tau_cal <- calibrator$tau_calibrated
+data <- data.frame(W = Wnew, CATE = c(CATE, tau_new, tau_cal), type = rep(c("CATE", "Original", "Calibrated"), each = length(Wnew)  ))
+
+ggplot(data, aes(x = W, y = CATE, color = type)) + geom_line()  + ggtitle("Effect of calibration")   + scale_x_continuous( )    + theme_bw()
+ 
+  
+  
+  
+  tau <-  1 + W + (W >= 0) * ( -2*   W)
+tau_new <- 1 + Wnew + (Wnew >= 0) * ( -2* Wnew)
+
+
+calibrator <- causalCalibrate(tau, A, Y, EY1, EY0, pA1, tau_pred = tau_new)
+library(ggplot2)
+library(latex2exp)
+tau_cal <- calibrator$tau_calibrated
+data <- data.frame(W = Wnew, CATE = c(CATE, tau_new, tau_cal), type = rep(c("CATE", "Original", "Calibrated"), each = length(Wnew)  ))
+
+ggplot(data, aes(x = W, y = CATE, color = type)) + geom_line()  + ggtitle("Effect of calibration")   + scale_x_continuous( )    + theme_bw()
+ 
+  
+  
+    tau <-  1 + W + (W >= 0) * ( -1*   W)
+tau_new <- 1 + Wnew + (Wnew >= 0) * ( -1* Wnew)
+
+
+calibrator <- causalCalibrate(tau, A, Y, EY1, EY0, pA1, tau_pred = tau_new)
+library(ggplot2)
+library(latex2exp)
+tau_cal <- calibrator$tau_calibrated
+data <- data.frame(W = Wnew, CATE = c(CATE, tau_new, tau_cal), type = rep(c("CATE", "Original", "Calibrated"), each = length(Wnew)  ))
+
+ggplot(data, aes(x = W, y = CATE, color = type)) + geom_line()  + ggtitle("Effect of calibration")   + scale_x_continuous( )    + theme_bw()
+   
 
 ```
 
+# cross-calibration
+ 
+## cross-calibration with nnet
+ 
+ 
 ```{r}
- ggsave("NoCalibrationCATE.pdf", width = 5, height = 3.5)
-
+library(sl3) #tlverse/sl3 on github. Used for cross fitting
+library(data.table)
  
-ggplot(data, aes(x = tau_cal, y = CATE)) + geom_point() + labs(x = TeX("$\\tau_n^*(w)$"), y =  TeX("$\\tau_0(w) = E[Y_1 - Y_0 | W = w]$") )+ ggtitle("Calibrated predictor vs actual CATE values")    + scale_x_continuous(limits = c(0, 2)) + geom_abline(slope=1, intercept=0, color = "red") + coord_flip()
+n <- 1000
+W <- runif(n, -1 , 1)
+pA1 <- plogis(1.5*W)
+A <- rbinom(n, size = 1, pA1)
+# True CATE(W) = 1 + W
+CATE <- abs(W)
+EY0 <- W
+EY1 <- W + CATE
+EY <- ifelse(A==1, EY1, EY0)
+Y <- rnorm(n, W + A * CATE, 0.3)
+zeta <- EY1 - EY0 + (A - pA1) /( (1-pA1)*pA1) *(Y - EY)
+data <- data.table(W, zeta = zeta)
 
- ggsave("CalibrationCATE.pdf", width = 5, height = 3.5)
+task <- sl3_Task$new(data, covariates = c("W"), outcome = "zeta", folds = 10)
+# choose between base_learners
 
+base_learner <- Lrnr_nnet$new(size = 25) # single layer neural net
+
+
+
+lrnr_tau <- Lrnr_cv$new(base_learner, full_fit = TRUE)
+#train predictor
+lrnr_tau <- lrnr_tau$train(task) # does both cross fitting and full sample fitting
+
+tau_no_crossfit <-  lrnr_tau$predict_fold(task, "full") # predictions using full predictor fit on all data
+tau_out_of_fold <- lrnr_tau$predict_fold(task, "validation") # pooled out of fold predictions from cross fitted predictors
+tau_all <- do.call(cbind, lapply(1:10, function(k) {
+  lrnr_tau$predict_fold(task, k) # fold-specific predictions
+})) # Get full sample predictions from each fold-specific predictor.
+
+# Compute calibrator from data
+calibrator <- causalCalibrate(tau = tau_out_of_fold, A = A, Y = Y, EY1 = EY1, EY0 = EY0, pA1 = pA1)
+
+
+# tau_all should be the stacked cross-fitted prediction matrix for observations at which we would like to get the calibrated predictions.
+tau_cal <- cross_calibrate(calibrator, tau_all)
+
+
+data <- data.frame(W = W, CATE = c(CATE, tau_no_crossfit, tau_cal), type = rep(c("True CATE", "Uncalibrated", "Calibrated"), each = length(W)  ))
+
+ggplot(data, aes(x = W, y = CATE, color = type)) + geom_line()  + ggtitle("Effect of calibration")   + scale_x_continuous( )    + theme_bw()
+   
  
-
+  
+# We improve mean-squared error by calibrating.
+mean((tau_no_crossfit - CATE)^2)
+mean((tau_cal - CATE)^2)
  
 ```
-
-
-
-```{r}
-
-calibrator <- causalCalibrate(tau, A, Y, EY1, EY0, pA1)
-plot(CATE,tau)
-
-plot(CATE,calibrator$tau_calibrated)
-
-# Uncalibrated predictor is incorrect for negative values of W
-tau <-  abs(W)
+ 
+ 
+ 
  
 
-calibrator <- causalCalibrate(tau, A, Y, EY1, EY0, pA1)
-plot(tau,CATE )
-plot(tau,calibrator$tau_calibrated)
+ 
+ 
+## cross-calibration with xgboost
+ 
+ 
+```{r}
+library(sl3) #tlverse/sl3 on github. Used for cross fitting
+library(data.table)
+ 
+n <- 1000
+W <- runif(n, -1 , 1)
+pA1 <- plogis(1.5*W)
+A <- rbinom(n, size = 1, pA1)
+# True CATE(W) = 1 + W
+CATE <- abs(W)
+EY0 <- W
+EY1 <- W + CATE
+EY <- ifelse(A==1, EY1, EY0)
+Y <- rnorm(n, W + A * CATE, 0.3)
+zeta <- EY1 - EY0 + (A - pA1) /( (1-pA1)*pA1) *(Y - EY)
+data <- data.table(W, zeta = zeta)
 
-plot(CATE,calibrator$tau_calibrated)
+task <- sl3_Task$new(data, covariates = c("W"), outcome = "zeta", folds = 10)
+# choose between base_learners
+base_learner <- Lrnr_xgboost$new(max_depth = 3, nrounds = 10) # xgboost
+ 
 
+
+
+lrnr_tau <- Lrnr_cv$new(base_learner, full_fit = TRUE)
+#train predictor
+lrnr_tau <- lrnr_tau$train(task) # does both cross fitting and full sample fitting
+
+tau_no_crossfit <-  lrnr_tau$predict_fold(task, "full") # predictions using full predictor fit on all data
+tau_out_of_fold <- lrnr_tau$predict_fold(task, "validation") # pooled out of fold predictions from cross fitted predictors
+tau_all <- do.call(cbind, lapply(1:10, function(k) {
+  lrnr_tau$predict_fold(task, k) # fold-specific predictions
+})) # Get full sample predictions from each fold-specific predictor.
+
+# Compute calibrator from data
+calibrator <- causalCalibrate(tau = tau_out_of_fold, A = A, Y = Y, EY1 = EY1, EY0 = EY0, pA1 = pA1)
+
+
+# tau_all should be the stacked cross-fitted prediction matrix for observations at which we would like to get the calibrated predictions.
+tau_cal <- cross_calibrate(calibrator, tau_all)
+
+
+data <- data.frame(W = W, CATE = c(CATE, tau_no_crossfit, tau_cal), type = rep(c("True CATE", "Uncalibrated", "Calibrated"), each = length(W)  ))
+
+ggplot(data, aes(x = W, y = CATE, color = type)) + geom_line()  + ggtitle("Effect of calibration")   + scale_x_continuous( )    + theme_bw()
+   
+ 
+ 
+  
+# We improve mean-squared error by calibrating.
+mean((tau_no_crossfit - CATE)^2)
+mean((tau_cal - CATE)^2)
+ 
 ```

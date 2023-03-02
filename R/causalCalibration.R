@@ -1,7 +1,7 @@
 
 
 #' Causal calibration of conditional average treatment effect (CATE) predictors
-#' We recommend passing in pooled out-of-fold estimates obtained from cross-fitted nuisance function estimators. 
+#' We recommend passing in pooled out-of-fold estimates obtained from cross-fitted nuisance function estimators.
 #' To implement cross-calibration, the argument `tau` should be the pooled out-of-fold treatment effect predictions from the cross-fitted predictors.
 #' The output can then be passed to the function `cross_calibrate` to obtain the final cross-calibrated predictions.
 #' Suppose we observe `n` realizations of the data-structure `(W, A, Y)`
@@ -44,7 +44,7 @@ causalCalibrate <- function(tau, A, Y, EY1, EY0, pA1, weights = rep(1, length(ta
 
   # causal isotonic calibration
   fit_iso <- isoreg(tau, pseudo_outcome)
-  
+
   # correct poor boundary behavior, an artifact of isotonic regression.
   # This correction is adhoc and there are probably more principled ways to do this.
 
@@ -54,24 +54,12 @@ causalCalibrate <- function(tau, A, Y, EY1, EY0, pA1, weights = rep(1, length(ta
   ymax <- rev(sort(fit_iso$yf))[1]
   ymax2 <- rev(sort(fit_iso$yf))[2]
   fit_iso$yf[fit_iso$yf==ymax] <- ymax2
-  
+
   # Step function from iso fit
   calibration_function <- as.stepfun(fit_iso)
 
   return(list( tau_calibrated = calibration_function(tau_pred), calibration_function = calibration_function, iso_reg_fit = fit_iso  ))
 }
-
-#' @param output An output list from the causalCalibrate function obtained from passing in the pooled out-of-fold predictions of the cross-fitted uncalibrated predictors.
-#' @param tau_mat An n by k matrix of n row-wise stacked predictions from k cross-fitted uncalibrated predictors.
-#' Each column should correspond with the treatment effect predictions from one of the k fold-specific uncalibrated predictors.
-#' @returns A vector of n calibrated predictions obtained by taking pointwise medians of each of the fold-specific calibrated predictors.
-#' @export
-cross_calibrate <- function(output, tau_mat) {
-  calibration_function <- output$calibration_function
-  tau_mat_cal <- apply(tau_mat, 2, calibration_function) 
-  tau_cal <- as.vector(apply(tau_mat_cal, 1, quantile, type = 3, probs = 0.5))
-  return(tau_cal)
- }
 
 
 
