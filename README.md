@@ -9,6 +9,10 @@ See vignette for code examples.
 
 
 ```
+install.packages(“devtools”)
+library(devtools)
+install_github(“larsvanderlaan/causalCalibration”)
+library(causalCalibration)
 
 set.seed(123)
 n <- 1000
