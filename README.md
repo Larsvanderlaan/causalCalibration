@@ -28,6 +28,7 @@ Y <- rnorm(n, W + A * CATE, 0.3)
 tau <- exp(CATE) - 1
  
 calibrator <- causalCalibrate(tau, A, Y, EY1, EY0, pA1, tau_pred = tau)
-plot(W,  calibrator$tau_calibrated)
+calibrated_preds <- calibrator$calibration_function(tau) # also equal to calibrator$tau_calibrated
+plot(W,  calibrated_preds)
 
 ```
