@@ -2,15 +2,7 @@
 % Please edit documentation in R/causalCalibration.R
 \name{causalCalibrate}
 \alias{causalCalibrate}
-\title{Causal calibration of conditional average treatment effect (CATE) predictors
-We recommend passing in pooled out-of-fold estimates obtained from cross-fitted nuisance function estimators.
-To implement cross-calibration, the argument `tau` should be the pooled out-of-fold treatment effect predictions from the cross-fitted predictors.
-The output can then be passed to the function `cross_calibrate` to obtain the final cross-calibrated predictions.
-Suppose we observe `n` realizations of the data-structure `(W, A, Y)`
-where:
-- `W` is a possibly high dimensional vector of baseline variables (i.e. the context)
-- `A` is a binary treatment taking values in {0,1} (i.e. the action)
-- `Y` is an arbitrary outcome that captures the effectiveness of the treatment `A` (i.e. the reward)}
+\title{Causal calibration of conditional average treatment effect (CATE) predictors}
 \usage{
 causalCalibrate(
   tau,
@@ -48,9 +40,18 @@ calibration_function: A calibration function that can be used to map the initial
 iso_reg_fit: The internal isotonic calibration fit that the calibration_function is derived from.
 }
 \description{
-Let `w -> tau(w)` be a treatment effect predictor that maps a given context `w` to a treatment effect score `tau(w)`.
+We recommend passing in pooled out-of-fold estimates obtained from cross-fitted nuisance function estimators.
+To implement cross-calibration, the argument `tau` should be the pooled out-of-fold treatment effect predictions from the cross-fitted predictors.
+The output can then be passed to the function `cross_calibrate` to obtain the final cross-calibrated predictions.
+Suppose we observe `n` realizations of the data-structure `(W, A, Y)`
+where:
+- `W` is a possibly high dimensional vector of baseline variables (i.e. the context)
+- `A` is a binary treatment taking values in {0,1} (i.e. the action)
+- `Y` is an arbitrary outcome that captures the effectiveness of the treatment `A` (i.e. the reward)
 }
 \details{
+Let `w -> tau(w)` be a treatment effect predictor that maps a given context `w` to a treatment effect score `tau(w)`.
+
 The methods in this package calibrate `tau` so that the resulting calibrated predictor `tau*`
 satisfies `tau*(w) = E[Y(1) - Y(0)|tau*(W) = tau*(w)]` in an L^2(P_W) sense up to an error of `n^(-1/3)`.
 
