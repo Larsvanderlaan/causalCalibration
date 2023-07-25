@@ -1,12 +1,18 @@
 # causalCalibration: Causal Isotonic Calibration for Heterogeneous Treatment Effects
 
-Provides R code implementing causal isotonic calibration (Algorithm 1) as described 
+Provides R code implementing causal isotonic calibration and cross-calibration as described 
 in the manuscript "Causal Isotonic Calibration for Heterogeneous Treatment Effects" by Lars van der Laan, Ernesto Ulloa, Marco Carone, and Alex Luedtke.
 
-Preprint can be found at this link: https://arxiv.org/abs/2302.14011
+Preprint describing methods and algorithms can be found at this link: https://arxiv.org/abs/2302.14011.
+
+See vignette for code examples.
 
 
 ```
+install.packages(“devtools”)
+library(devtools)
+install_github(“larsvanderlaan/causalCalibration”)
+library(causalCalibration)
 
 set.seed(123)
 n <- 1000
@@ -22,6 +28,7 @@ Y <- rnorm(n, W + A * CATE, 0.3)
 tau <- exp(CATE) - 1
  
 calibrator <- causalCalibrate(tau, A, Y, EY1, EY0, pA1, tau_pred = tau)
-plot(W,  calibrator$tau_calibrated)
+calibrated_preds <- calibrator$calibration_function(tau) # also equal to calibrator$tau_calibrated
+plot(W,  calibrated_preds)
 
 ```

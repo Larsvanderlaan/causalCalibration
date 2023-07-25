@@ -1,6 +1,6 @@
 
-
 #' Causal calibration of conditional average treatment effect (CATE) predictors
+#'
 #' We recommend passing in pooled out-of-fold estimates obtained from cross-fitted nuisance function estimators.
 #' To implement cross-calibration, the argument `tau` should be the pooled out-of-fold treatment effect predictions from the cross-fitted predictors.
 #' The output can then be passed to the function `cross_calibrate` to obtain the final cross-calibrated predictions.
