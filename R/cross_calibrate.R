@@ -9,6 +9,7 @@
 cross_calibrate <- function(output, tau_mat) {
   calibration_function <- output$calibration_function
   tau_mat_cal <- apply(tau_mat, 2, calibration_function)
+  # definition of median is important for theory. It must be an order statistic, so no averaging if ties.
   tau_cal <- as.vector(apply(tau_mat_cal, 1, quantile, type = 1, probs = 0.5))
   return(tau_cal)
 }

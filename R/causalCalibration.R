@@ -48,12 +48,12 @@ causalCalibrate <- function(tau, A, Y, EY1, EY0, pA1, weights = rep(1, length(ta
   # correct poor boundary behavior, an artifact of isotonic regression.
   # This correction is adhoc and there are probably more principled ways to do this.
 
-  ymin <- sort(fit_iso$yf)[1]
-  ymin2 <- sort(fit_iso$yf)[2]
-  fit_iso$yf[fit_iso$yf==ymin] <- ymin2
-  ymax <- rev(sort(fit_iso$yf))[1]
-  ymax2 <- rev(sort(fit_iso$yf))[2]
-  fit_iso$yf[fit_iso$yf==ymax] <- ymax2
+  # ymin <- sort(fit_iso$yf)[1]
+  # ymin2 <- sort(fit_iso$yf)[2]
+  # fit_iso$yf[fit_iso$yf==ymin] <- ymin2
+  # ymax <- rev(sort(fit_iso$yf))[1]
+  # ymax2 <- rev(sort(fit_iso$yf))[2]
+  # fit_iso$yf[fit_iso$yf==ymax] <- ymax2
 
   # Step function from iso fit
   calibration_function <- as.stepfun(fit_iso)
