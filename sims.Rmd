@@ -1,0 +1,117 @@
+---
+title: "sims"
+output: html_document
+date: '2023-03-14'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r}
+library(sl3)
+library(data.table)
+n <- 5000
+nn<-n
+d <- 4
+ Qbar = function(a,w){plogis(-1.5 + 1.5 * a + 2 * a * abs(w$W1) * abs(w$W2) - 2.5 * (1-a) * abs(w$W2) * w$W3
+                              + 2.5 * w$W3 + 2.5 * (1-a) * sqrt(abs(w$W4)) - 1.5 * a * I(w$W2 < .5) +
+                                1.5 * (1-a) * I(w$W4 < 0))}
+  
+gbar = function(w){plogis(-0.25 -w$W1 + .5*w$W2 - w$W3 + 0.5 * w$W4)}
+  
+
+W = data.frame(W1=runif(nn, min = -1, max = 1), 
+                   W2=runif(nn, min = -1, max = 1), 
+                   W3=runif(nn, min = -1, max = 1), 
+                   W4=runif(nn, min = -1, max = 1))
+    PS <- gbar(W)
+    A = rbinom(nn, 1, PS)
+    Q1 <- Qbar(rep(1, nn), W)
+    Q0 <- Qbar(rep(0, nn), W)
+    Y1 = rbinom(nn, 1, Q1)
+    Y0 = rbinom(nn, 1, Q0)
+    Y <- A * Y1 + (1-A) * Y0
+    
+    
+ 
+
+ 
+cate <-Q1 - Q0
+
+data <- data.table(W,A,Y)
+data1 <- data0 <- data 
+data1$A <- 1
+data0$A <- 0
+taskY <- sl3_Task$new(data, covariates = c(colnames(W), "A"), outcome = "Y")
+taskY1 <- sl3_Task$new(data1, covariates = c(colnames(W), "A"), outcome = "Y")
+taskY0 <- sl3_Task$new(data0, covariates = c(colnames(W), "A"), outcome = "Y")
+taskA <- sl3_Task$new(data, covariates = c(colnames(W)), outcome = "A")
+
+lrnr_xg <- Lrnr_sl$new(Stack$new(list(Lrnr_xgboost$new(max_depth = 2),
+                          Lrnr_xgboost$new(max_depth = 3),
+                          Lrnr_xgboost$new(max_depth = 4),
+                          Lrnr_xgboost$new(max_depth = 5))), metalearner = Lrnr_cv_selector$new(loss_squared_error))
+
+lrnr_nuis <- Stack$new(list(Lrnr_xgboost$new(max_depth = 2, nrounds = 10),
+                          Lrnr_xgboost$new(max_depth = 3, nrounds = 10),
+                          Lrnr_xgboost$new(max_depth = 4, nrounds = 10),
+                          Lrnr_xgboost$new(max_depth = 5, nrounds = 10))) 
+
+lrnr_nuis <- make_learner(Pipeline, Lrnr_cv$new(lrnr_nuis), Lrnr_cv_selector$new(loss_squared_error))
+
+
+lrnr_Q <- lrnr_nuis$train(taskY)
+lrnr_g <- lrnr_nuis$train(taskA)
+Q1 <- lrnr_Q$predict(taskY1)
+Q0 <- lrnr_Q$predict(taskY0)
+g <-  lrnr_g$predict(taskA)
+pseudo_dr <- Q1 - Q0  + (A - g) / (g * (1-g)) * ( Y - ifelse(A==1, Q1, Q0))
+pseudo_ipw <- Q1 - Q0
+pseudo_t <- (A - g) / (g * (1-g)) * Y
+data_pseudo <- data.table(W, pseudo_dr, pseudo_ipw, pseudo_t)
+task_dr <- sl3_Task$new(data_pseudo, covariates = c(colnames(W)), outcome = "pseudo_dr")
+task_ipw <- sl3_Task$new(data_pseudo, covariates = c(colnames(W)), outcome = "pseudo_ipw")
+task_t <- sl3_Task$new(data_pseudo, covariates = c(colnames(W)), outcome = "pseudo_t")
+
+lrnr_dr <- lrnr_xg$train(task_dr)
+lrnr_t <- lrnr_xg$train(task_t)
+lrnr_ipw <- lrnr_xg$train(task_ipw)
+
+get_cal_pred <- function(lrnr){
+  dr_lrnr_cf <- lrnr_tau$predict_fold(task_tau, "validation")
+  cal_fun <- causalCalibrate(dr_lrnr_cf, A, Y, Q1, Q0, g)
+  dr_lrnr_mat <- do.call(cbind, lapply(1:10, function(k) {
+  lrnr$predict_fold(task_dr, k)
+}))
+  cross_lrnr <- cross_calibrate(cal_fun, dr_lrnr_mat)
+  
+}
+dr_lrnr <- lrnr_tau$predict_fold(task_tau, "full")
+dr_lrnr_cf <- lrnr_tau$predict_fold(task_tau, "validation")
+ 
+t_lrnr <- Q1-Q0
+mean((dr_lrnr - cate)^2)
+mean((t_lrnr - cate)^2)
+cal_fun <- causalCalibrate(dr_lrnr_cf, A, Y, Q1, Q0, g)
+cross_lrnr <- cross_calibrate(cal_fun, dr_lrnr_mat)
+
+mean((dr_lrnr - cate)^2)
+mean((t_lrnr - cate)^2)
+mean((dr_lrnr_cf - cate)^2)
+mean((cross_lrnr - cate)^2)
+
+plot(cate, Q1-Q0)
+plot(cate, dr_lrnr)
+plot(cate, cross_lrnr)
+ 
+```
+
+
+
+
+
+
+
