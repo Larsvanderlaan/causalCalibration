@@ -73,7 +73,7 @@ plot(W,  new_CATE_preds_crosscalibrated)
 
 To reference this work, please use the following bibtex citation:
 
-
+`
 @inproceedings{van2023causal,
   title={Causal isotonic calibration for heterogeneous treatment effects},
   author={{van der Laan}, Lars and Ulloa-P{\'e}rez, Ernesto and Carone, Marco and Luedtke, Alex},
@@ -85,4 +85,4 @@ To reference this work, please use the following bibtex citation:
     pdf={https://proceedings.mlr.press/v202/van-der-laan23a/van-der-laan23a.pdf}
 }
 
-
+`
