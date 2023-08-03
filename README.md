@@ -3,9 +3,10 @@
 Provides R code implementing causal isotonic calibration and cross-calibration as described 
 in the manuscript "Causal Isotonic Calibration for Heterogeneous Treatment Effects" by Lars van der Laan, Ernesto Ulloa, Marco Carone, and Alex Luedtke.
 
-Preprint describing methods and algorithms can be found at this link: https://arxiv.org/abs/2302.14011.
+A preprint describing methods and algorithms can be found at this link: https://arxiv.org/abs/2302.14011.
+This work was published in the International Conference on Machine Learning (ICML) (2023) and can be found here: https://proceedings.mlr.press/v202/van-der-laan23a/van-der-laan23a.pdf
 
-See vignette for code examples.
+See the vignette for code examples.
 
 
 ```
