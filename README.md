@@ -64,8 +64,25 @@ initial_CATE_cfpreds_mat <- do.call(cbind, lapply(1:K, function(k) {
 new_CATE_preds_crosscalibrated <- cross_calibrate(calibrator, initial_CATE_cfpreds_mat)
 plot(W,  new_CATE_preds_crosscalibrated)
 
- 
 
 
 
 ```
+
+## Citation
+
+To reference this work, please use the following bibtex citation:
+
+
+@inproceedings{van2023causal,
+  title={Causal isotonic calibration for heterogeneous treatment effects},
+  author={{van der Laan}, Lars and Ulloa-P{\'e}rez, Ernesto and Carone, Marco and Luedtke, Alex},
+  booktitle={Proceedings of the 40th International Conference on Machine Learning (ICML)},
+  year={2023},
+  address={Honolulu, Hawaii, USA},
+  publisher={PMLR},
+  volume={202},
+    pdf={https://proceedings.mlr.press/v202/van-der-laan23a/van-der-laan23a.pdf}
+}
+
+
