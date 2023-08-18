@@ -33,7 +33,7 @@
 #' @returns iso_reg_fit: The internal isotonic calibration fit that the calibration_function is derived from.
 #' @import mgcv
 #' @export
-causalCalibrate <- function(tau, A, Y, EY1, EY0, pA1, weights = rep(1, length(tau)), tau_pred = tau) {
+causalCalibrate <- function(tau, A, Y, EY1, EY0, pA1,  tau_pred = tau) {
 
 
   EY <- ifelse(A==1, EY1, EY0)
