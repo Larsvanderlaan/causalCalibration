@@ -4,10 +4,15 @@ from __future__ import annotations
 
 import json
 import os
+import importlib.util
 import unittest
 
 
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+HAS_NOTEBOOK_DEPS = all(
+    importlib.util.find_spec(module_name) is not None
+    for module_name in ("numpy", "scipy", "lightgbm", "sklearn")
+)
 
 
 class DocsTests(unittest.TestCase):
@@ -60,10 +65,12 @@ class DocsTests(unittest.TestCase):
             encoding="utf-8",
         ) as handle:
             page = handle.read()
-        self.assertIn("../examples/python-workflow.ipynb", page)
-        self.assertIn("../r/causalCalibration/vignettes/getting-started.Rmd", page)
+        self.assertIn("examples/python-workflow.ipynb", page)
+        self.assertIn("r/causalCalibration/vignettes/getting-started.Rmd", page)
 
     def test_python_notebook_executes(self) -> None:
+        if not HAS_NOTEBOOK_DEPS:
+            self.skipTest("Notebook execution requires numpy/scipy/lightgbm/sklearn")
         with open(os.path.join(REPO_ROOT, "examples", "python-workflow.ipynb"), encoding="utf-8") as handle:
             notebook = json.load(handle)
         namespace: dict[str, object] = {}
