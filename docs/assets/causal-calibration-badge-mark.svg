@@ -1,0 +1,29 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="164" y1="136" x2="836" y2="888" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFF8EE"/>
+      <stop offset="1" stop-color="#F4EBDD"/>
+    </linearGradient>
+    <linearGradient id="ring" x1="244" y1="214" x2="800" y2="810" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0D8A7A"/>
+      <stop offset="1" stop-color="#D98B3F"/>
+    </linearGradient>
+    <linearGradient id="plot" x1="286" y1="300" x2="740" y2="748" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0B685C"/>
+      <stop offset="1" stop-color="#16323D"/>
+    </linearGradient>
+  </defs>
+  <circle cx="512" cy="512" r="408" fill="url(#bg)"/>
+  <circle cx="512" cy="512" r="408" stroke="url(#ring)" stroke-width="44"/>
+  <circle cx="512" cy="512" r="338" fill="#FFFDF9" stroke="#E7D9C4" stroke-width="14"/>
+  <path d="M318 690V332H706" stroke="#D5C4AD" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M354 654L672 364" stroke="#D98B3F" stroke-width="18" stroke-linecap="round" stroke-dasharray="10 26"/>
+  <path d="M354 606H442V552H514V472H590V420H672" stroke="url(#plot)" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="354" cy="606" r="16" fill="#0D8A7A"/>
+  <circle cx="442" cy="552" r="16" fill="#0D8A7A"/>
+  <circle cx="514" cy="472" r="16" fill="#0D8A7A"/>
+  <circle cx="590" cy="420" r="16" fill="#0D8A7A"/>
+  <circle cx="672" cy="420" r="16" fill="#0D8A7A"/>
+  <path d="M308 230C392 182 460 166 548 178C644 190 712 242 760 320" stroke="#0D8A7A" stroke-width="22" stroke-linecap="round" opacity="0.18"/>
+  <path d="M264 784C348 838 442 866 540 850C646 834 744 772 800 682" stroke="#D98B3F" stroke-width="22" stroke-linecap="round" opacity="0.18"/>
+</svg>

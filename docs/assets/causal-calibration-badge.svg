@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+  <title id="title">causalCalibration circular badge</title>
+  <desc id="desc">Circular causalCalibration badge with a calibration plot and the package name centered beneath it.</desc>
+  <defs>
+    <clipPath id="plot-window-causalcalibration">
+      <rect x="270" y="252" width="484" height="292" rx="48"/>
+    </clipPath>
+  </defs>
+  <g fill="none" fill-rule="evenodd">
+    <circle cx="512" cy="512" r="336" fill="#FFF8F0" stroke="#16323D" stroke-width="24"/>
+    <circle cx="512" cy="512" r="292" fill="none" stroke="#0D8A7A" stroke-opacity="0.14" stroke-width="10"/>
+
+    <rect x="246" y="228" width="532" height="340" rx="56" fill="#FFFDF9" stroke="#16323D" stroke-width="18"/>
+    <path d="M320 494h382" stroke="#16323D" stroke-opacity="0.14" stroke-linecap="round" stroke-width="8"/>
+    <path d="M320 430h382" stroke="#16323D" stroke-opacity="0.1" stroke-linecap="round" stroke-width="8"/>
+    <path d="M320 366h382" stroke="#16323D" stroke-opacity="0.08" stroke-linecap="round" stroke-width="8"/>
+    <path d="M340 500L690 300" stroke="#16323D" stroke-opacity="0.12" stroke-dasharray="14 12" stroke-linecap="round" stroke-width="10"/>
+
+    <g clip-path="url(#plot-window-causalcalibration)">
+      <path d="M340 486L438 486L438 432L520 432L520 382L602 382L602 326L688 326" stroke="#0D8A7A" stroke-linecap="round" stroke-linejoin="round" stroke-width="22"/>
+      <path d="M340 470C374 458 410 438 440 424C478 406 520 394 562 388C610 382 654 360 700 326" stroke="#D98B3F" stroke-linecap="round" stroke-linejoin="round" stroke-width="18"/>
+      <circle cx="340" cy="486" r="13" fill="#FFF8F0" stroke="#16323D" stroke-width="8"/>
+      <circle cx="438" cy="432" r="13" fill="#FFF8F0" stroke="#16323D" stroke-width="8"/>
+      <circle cx="520" cy="382" r="13" fill="#FFF8F0" stroke="#16323D" stroke-width="8"/>
+      <circle cx="602" cy="326" r="13" fill="#FFF8F0" stroke="#16323D" stroke-width="8"/>
+      <circle cx="688" cy="326" r="13" fill="#FFF8F0" stroke="#16323D" stroke-width="8"/>
+    </g>
+
+    <text x="512" y="680" fill="#16323D" font-family="'Avenir Next', 'Helvetica Neue', Arial, sans-serif" font-size="66" font-weight="700" text-anchor="middle">causalCalibration</text>
+  </g>
+</svg>
