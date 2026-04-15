@@ -98,5 +98,5 @@ Treat those cutoffs as workflow heuristics built into the package, not as univer
 
 # Reference examples
 
-- Python workflow notebook: [examples/python-workflow.ipynb](../examples/python-workflow.ipynb)
-- R vignette: [r/causalCalibration/vignettes/getting-started.Rmd](../r/causalCalibration/vignettes/getting-started.Rmd)
+- Python workflow notebook: [examples/python-workflow.ipynb](https://github.com/Larsvanderlaan/causalCalibration/blob/main/examples/python-workflow.ipynb)
+- R vignette: [r/causalCalibration/vignettes/getting-started.Rmd](https://github.com/Larsvanderlaan/causalCalibration/blob/main/r/causalCalibration/vignettes/getting-started.Rmd)
