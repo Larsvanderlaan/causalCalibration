@@ -14,7 +14,10 @@ jobs:
         with:
           python-version: "3.11"
       - name: Install Python package
-        run: python -m pip install -e 'python[plot]'
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install numpy scipy scikit-learn lightgbm matplotlib
+          python -m pip install -e python
       - name: Run Python tests
         run: PYTHONPATH=python/src python -m unittest discover -s python/tests
 
@@ -26,10 +29,10 @@ jobs:
         with:
           python-version: "3.11"
       - uses: r-lib/actions/setup-r@v2
-      - name: Install Python dependencies for reticulate
+      - name: Install Python dependencies
         run: python -m pip install -e 'python[plot]'
       - name: Install R test dependencies
-        run: Rscript -e 'install.packages(c("testthat","reticulate"), repos = "https://cloud.r-project.org"); stopifnot(requireNamespace("testthat", quietly = TRUE), requireNamespace("reticulate", quietly = TRUE))'
+        run: Rscript -e 'install.packages("testthat", repos = "https://cloud.r-project.org"); stopifnot(requireNamespace("testthat", quietly = TRUE))'
       - name: Run R tests
         env:
           RETICULATE_PYTHON: ${{ env.pythonLocation }}/bin/python
@@ -45,9 +48,12 @@ jobs:
           python-version: "3.11"
       - uses: r-lib/actions/setup-r@v2
       - name: Install Python package
-        run: python -m pip install -e 'python[plot]'
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install numpy scipy scikit-learn lightgbm matplotlib
+          python -m pip install -e python
       - name: Install R dependencies
-        run: Rscript -e 'install.packages(c("testthat","reticulate"), repos = "https://cloud.r-project.org"); stopifnot(requireNamespace("testthat", quietly = TRUE), requireNamespace("reticulate", quietly = TRUE))'
+        run: Rscript -e 'install.packages("testthat", repos = "https://cloud.r-project.org"); stopifnot(requireNamespace("testthat", quietly = TRUE))'
       - name: Run shared-fixture tests
         env:
           RETICULATE_PYTHON: ${{ env.pythonLocation }}/bin/python
@@ -66,9 +72,12 @@ jobs:
       - uses: r-lib/actions/setup-r@v2
       - uses: quarto-dev/quarto-actions/setup@v2
       - name: Install Python docs dependencies
-        run: python -m pip install -e 'python[plot]'
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install numpy scipy scikit-learn lightgbm matplotlib
+          python -m pip install -e python
       - name: Install R vignette dependencies
-        run: Rscript -e 'install.packages(c("knitr","rmarkdown","reticulate"), repos = "https://cloud.r-project.org"); stopifnot(requireNamespace("knitr", quietly = TRUE), requireNamespace("rmarkdown", quietly = TRUE), requireNamespace("reticulate", quietly = TRUE))'
+        run: Rscript -e 'install.packages(c("knitr","rmarkdown"), repos = "https://cloud.r-project.org"); stopifnot(requireNamespace("knitr", quietly = TRUE), requireNamespace("rmarkdown", quietly = TRUE))'
       - name: Execute Python docs tests
         run: PYTHONPATH=python/src python -m unittest discover -s python/tests -p 'test_docs.py'
       - name: Execute R vignette chunks

@@ -22,6 +22,9 @@ if (!requireNamespace("causalCalibration", quietly = TRUE)) {
   library(causalCalibration)
 }
 set.seed(11)
+has_isotonic_backend <- requireNamespace("reticulate", quietly = TRUE) &&
+  isTRUE(tryCatch(reticulate::py_module_available("lightgbm"), error = function(...) FALSE))
+workflow_method <- if (has_isotonic_backend) "isotonic" else "histogram"
 ```
 
 # Overview
@@ -74,7 +77,7 @@ calibrator <- fit_calibrator(
   mu1 = mu1,
   propensity = propensity,
   loss = "dr",
-  method = "isotonic"
+  method = workflow_method
 )
 
 tau_calibrated <- predict(calibrator, tau_new)
@@ -105,7 +108,7 @@ cross_calibrator <- fit_cross_calibrator(
   mu1 = mu1,
   propensity = propensity,
   loss = "dr",
-  method = "isotonic"
+  method = workflow_method
 )
 
 tau_cross_calibrated <- predict(cross_calibrator, tau_fold_matrix)
@@ -141,7 +144,10 @@ diagnostics <- diagnose_calibration(
 )
 
 summary(diagnostics)
+summary(diagnostics$blp)
 ```
+
+Use the BLP slope as a compact score diagnostic. If its confidence interval contains `0`, the score does not show clear evidence of effect heterogeneity on that linear scale.
 
 # What population is being calibrated?
 

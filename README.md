@@ -42,6 +42,8 @@ R:
 install.packages("r/causalCalibration", repos = NULL, type = "source")
 ```
 
+For `method = "isotonic"` in R, also install `reticulate` and make sure the active Python environment has `lightgbm`.
+
 ## Quick start
 
 User-facing website:

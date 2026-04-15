@@ -568,7 +568,8 @@ diag &lt;- diagnose_calibration(
             <strong>Diagnostics</strong>
             <p>
               <code>diagnose_calibration()</code> estimates calibration error with balanced
-              jackknife uncertainty and can report original-population and
+              jackknife uncertainty, reports a BLP slope diagnostic for whether the
+              score captures effect heterogeneity, and can report original-population and
               overlap-weighted targets in the same object. Use
               <code>assess_overlap()</code> before fitting when you want a quick overlap
               check, the default tail and ESS summaries, and the package's default loss

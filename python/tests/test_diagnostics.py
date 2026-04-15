@@ -25,6 +25,13 @@ class DiagnosticsTests(unittest.TestCase):
         self.assertEqual(len(diagnostics.fold_estimates), 5)
         self.assertLessEqual(diagnostics.confidence_interval[0], diagnostics.confidence_interval[1])
         self.assertGreaterEqual(diagnostics.standard_error, 0.0)
+        self.assertGreaterEqual(diagnostics.blp_diagnostic.slope_p_value, 0.0)
+        self.assertLessEqual(diagnostics.blp_diagnostic.slope_p_value, 1.0)
+        self.assertEqual(
+            diagnostics.blp_diagnostic.slope_excludes_zero,
+            (diagnostics.blp_diagnostic.slope_confidence_interval[0] > 0.0)
+            or (diagnostics.blp_diagnostic.slope_confidence_interval[1] < 0.0),
+        )
 
     def test_overlap_target_diagnostics_returns_both_targets(self) -> None:
         diagnostics = diagnose_calibration(
@@ -43,6 +50,8 @@ class DiagnosticsTests(unittest.TestCase):
         self.assertIsNotNone(diagnostics.overlap_result)
         self.assertEqual(diagnostics.target_population, "both")
         self.assertIsNotNone(diagnostics.overlap_diagnostics)
+        self.assertIsNotNone(diagnostics.dr_result.blp_diagnostic)
+        self.assertIsNotNone(diagnostics.overlap_result.blp_diagnostic)
 
     def test_shared_fixture_diagnostics_match(self) -> None:
         fixture_dir = os.path.abspath(
@@ -71,8 +80,27 @@ class DiagnosticsTests(unittest.TestCase):
             for row in expected
             if row["kind"] == "diagnostics" and row["metric"] == "standard_error"
         )
+        want_blp_slope = next(
+            float(row["value"])
+            for row in expected
+            if row["kind"] == "diagnostics" and row["metric"] == "blp_slope"
+        )
+        want_blp_slope_se = next(
+            float(row["value"])
+            for row in expected
+            if row["kind"] == "diagnostics" and row["metric"] == "blp_slope_standard_error"
+        )
         self.assertTrue(math.isclose(diagnostics.estimate, want_estimate, rel_tol=1e-8, abs_tol=1e-8))
         self.assertTrue(math.isclose(diagnostics.standard_error, want_se, rel_tol=1e-8, abs_tol=1e-8))
+        self.assertTrue(math.isclose(diagnostics.blp_diagnostic.slope, want_blp_slope, rel_tol=1e-8, abs_tol=1e-8))
+        self.assertTrue(
+            math.isclose(
+                diagnostics.blp_diagnostic.slope_standard_error,
+                want_blp_slope_se,
+                rel_tol=1e-8,
+                abs_tol=1e-8,
+            )
+        )
 
     def test_plotting_helpers_return_axes(self) -> None:
         diagnostics = diagnose_calibration(

@@ -1,3 +1,77 @@
+.cc_jackknife_standard_error <- function(fold_estimates) {
+  mean_estimate <- mean(fold_estimates)
+  sqrt(((length(fold_estimates) - 1) / length(fold_estimates)) * sum((fold_estimates - mean_estimate)^2))
+}
+
+.cc_normal_p_value <- function(estimate, standard_error) {
+  if (standard_error <= 0) {
+    return(if (estimate != 0) 0 else 1)
+  }
+  2 * stats::pnorm(-abs(estimate / standard_error))
+}
+
+.cc_fit_weighted_linear_projection <- function(predictions, pseudo_outcome, sample_weight) {
+  total_weight <- sum(sample_weight)
+  mean_x <- sum(sample_weight * predictions) / total_weight
+  mean_y <- sum(sample_weight * pseudo_outcome) / total_weight
+  sxx <- sum(sample_weight * (predictions - mean_x)^2)
+  slope <- if (sxx <= 1e-12) {
+    0
+  } else {
+    sxy <- sum(sample_weight * (predictions - mean_x) * (pseudo_outcome - mean_y))
+    sxy / sxx
+  }
+  intercept <- mean_y - slope * mean_x
+  list(intercept = intercept, slope = slope)
+}
+
+.cc_build_blp_result <- function(predictions, pseudo_outcome, sample_weight, fold_ids, confidence_level) {
+  full <- .cc_fit_weighted_linear_projection(predictions, pseudo_outcome, sample_weight)
+  unique_folds <- sort(unique(fold_ids))
+  intercept_folds <- vapply(
+    unique_folds,
+    function(fold) {
+      keep <- which(fold_ids != fold)
+      .cc_fit_weighted_linear_projection(predictions[keep], pseudo_outcome[keep], sample_weight[keep])$intercept
+    },
+    numeric(1)
+  )
+  slope_folds <- vapply(
+    unique_folds,
+    function(fold) {
+      keep <- which(fold_ids != fold)
+      .cc_fit_weighted_linear_projection(predictions[keep], pseudo_outcome[keep], sample_weight[keep])$slope
+    },
+    numeric(1)
+  )
+  intercept_standard_error <- .cc_jackknife_standard_error(intercept_folds)
+  slope_standard_error <- .cc_jackknife_standard_error(slope_folds)
+  z_score <- .cc_normal_quantile(confidence_level)
+  intercept_confidence_interval <- c(
+    full$intercept - z_score * intercept_standard_error,
+    full$intercept + z_score * intercept_standard_error
+  )
+  slope_confidence_interval <- c(
+    full$slope - z_score * slope_standard_error,
+    full$slope + z_score * slope_standard_error
+  )
+  structure(
+    list(
+      intercept = full$intercept,
+      intercept_standard_error = intercept_standard_error,
+      intercept_confidence_interval = intercept_confidence_interval,
+      intercept_p_value = .cc_normal_p_value(full$intercept, intercept_standard_error),
+      slope = full$slope,
+      slope_standard_error = slope_standard_error,
+      slope_confidence_interval = slope_confidence_interval,
+      slope_p_value = .cc_normal_p_value(full$slope, slope_standard_error),
+      slope_excludes_zero = slope_confidence_interval[[1]] > 0 || slope_confidence_interval[[2]] < 0,
+      jackknife_folds = length(unique_folds)
+    ),
+    class = "causal_calibration_blp_result"
+  )
+}
+
 .cc_linear_loo_curve <- function(predictions, pseudo_outcome, sample_weight) {
   sum_w <- sum(sample_weight)
   sum_x <- sum(sample_weight * predictions)
@@ -119,9 +193,7 @@
     },
     numeric(1)
   )
-  mean_estimate <- mean(fold_estimates)
-  variance <- ((length(unique_folds) - 1) / length(unique_folds)) * sum((fold_estimates - mean_estimate)^2)
-  standard_error <- sqrt(variance)
+  standard_error <- .cc_jackknife_standard_error(fold_estimates)
   z_score <- .cc_normal_quantile(confidence_level)
   grid <- .cc_mapping_grid(predictions)
   grid_estimates <- .cc_predict_backend(full$model, grid)
@@ -135,6 +207,13 @@
     curve_estimates = grid_estimates,
     curve_method = method,
     jackknife_folds = length(unique_folds),
+    blp = .cc_build_blp_result(
+      predictions = predictions,
+      pseudo_outcome = pseudo_outcome,
+      sample_weight = sample_weight,
+      fold_ids = fold_ids,
+      confidence_level = confidence_level
+    ),
     fold_estimates = fold_estimates,
     comparison_estimate = NULL,
     comparison_standard_error = NULL
@@ -164,10 +243,8 @@
       },
       numeric(1)
     )
-    mean_comparison <- mean(comparison_fold_estimates)
-    variance_comparison <- ((length(unique_folds) - 1) / length(unique_folds)) * sum((comparison_fold_estimates - mean_comparison)^2)
     result$comparison_estimate <- comparison$estimate
-    result$comparison_standard_error <- sqrt(variance_comparison)
+    result$comparison_standard_error <- .cc_jackknife_standard_error(comparison_fold_estimates)
   }
   class(result) <- "causal_calibration_target_result"
   result
@@ -318,6 +395,7 @@ diagnose_calibration <- function(
       curve_estimates = primary$curve_estimates,
       curve_method = primary$curve_method,
       jackknife_folds = primary$jackknife_folds,
+      blp = primary$blp,
       target_population = target_population,
       fold_estimates = primary$fold_estimates,
       comparison_estimate = primary$comparison_estimate,
@@ -339,7 +417,8 @@ summary.causal_calibration_target_result <- function(object, ...) {
     standard_error = object$standard_error,
     confidence_interval = object$confidence_interval,
     curve_method = object$curve_method,
-    jackknife_folds = object$jackknife_folds
+    jackknife_folds = object$jackknife_folds,
+    blp = summary(object$blp)
   )
   if (!is.null(object$comparison_estimate)) {
     summary$comparison_estimate <- object$comparison_estimate
@@ -358,7 +437,8 @@ summary.causal_calibration_diagnostics <- function(object, ...) {
     standard_error = object$standard_error,
     confidence_interval = object$confidence_interval,
     curve_method = object$curve_method,
-    jackknife_folds = object$jackknife_folds
+    jackknife_folds = object$jackknife_folds,
+    blp = summary(object$blp)
   )
   if (!is.null(object$comparison_estimate)) {
     summary$comparison_estimate <- object$comparison_estimate
@@ -381,7 +461,14 @@ print.causal_calibration_diagnostics <- function(x, ...) {
   cat(sprintf("  target_population: %s\n", x$target_population))
   cat(sprintf("  estimate: %.6f\n", x$estimate))
   cat(sprintf("  standard_error: %.6f\n", x$standard_error))
+  cat(sprintf("  blp_slope: %.6f\n", x$blp$slope))
+  cat(sprintf("  blp_slope_ci: [%.6f, %.6f]\n", x$blp$slope_confidence_interval[[1]], x$blp$slope_confidence_interval[[2]]))
   invisible(x)
+}
+
+#' @export
+summary.causal_calibration_blp_result <- function(object, ...) {
+  unclass(object)
 }
 
 #' @export

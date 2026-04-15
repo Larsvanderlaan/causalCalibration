@@ -42,7 +42,7 @@ Use for cross-fitted treatment-effect predictions.
 
 ## `diagnose_calibration()`
 
-Use for a calibration curve, a scalar error estimate, and uncertainty quantification.
+Use for a calibration curve, a scalar error estimate, a linear BLP-style score diagnostic, and uncertainty quantification.
 
 ### Inputs
 
@@ -93,7 +93,7 @@ Treat those cutoffs as workflow heuristics built into the package, not as univer
 
 ## `CalibrationDiagnostics`
 
-- `summary()`: scalar results and intervals
+- `summary()`: scalar results, BLP slope/intercept summaries, and intervals
 - plotting helpers: calibration-curve outputs for visualization
 
 # Reference examples

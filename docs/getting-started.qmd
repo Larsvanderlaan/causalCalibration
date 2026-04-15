@@ -16,6 +16,8 @@ R:
 install.packages("r/causalCalibration", repos = NULL, type = "source")
 ```
 
+For `method="isotonic"` in R, install `reticulate` and make sure the active Python environment includes `lightgbm`.
+
 # Mental model
 
 The package calibrates predictions from a learner you already have. Bring:
@@ -54,6 +56,7 @@ The package calibrates predictions from a learner you already have. Bring:
 
 - you want to quantify remaining calibration error,
 - compare raw and calibrated predictions,
+- check whether the score carries a non-flat treatment-effect signal through the BLP slope,
 - or understand whether your calibration choice is stable under your overlap conditions.
 
 # Workflow objects at a glance
@@ -74,7 +77,7 @@ For most users, start with:
 - `method="isotonic"`
 - cross-calibration when cross-fitted predictions are available
 
-Then use diagnostics to check whether weak overlap suggests moving to `loss="r"` for a more overlap-focused target.
+Then use diagnostics to check remaining calibration error, read the BLP slope CI, and see whether weak overlap suggests moving to `loss="r"` for a more overlap-focused target.
 `assess_overlap()` is the package's default screen for that decision; its thresholds are practical defaults, not universal rules.
 
 # Workflow helpers
