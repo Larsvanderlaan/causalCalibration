@@ -44,11 +44,17 @@ jobs:
           R CMD INSTALL r/causalCalibration
           Rscript -e 'library(causalCalibration); stopifnot(is.function(fit_calibrator), is.function(fit_cross_calibrator), is.function(diagnose_calibration))'
       - name: Install R test dependencies
-        run: Rscript -e 'install.packages(c("testthat","reticulate"), repos = "https://cloud.r-project.org"); stopifnot(requireNamespace("testthat", quietly = TRUE), requireNamespace("reticulate", quietly = TRUE))'
+        run: Rscript -e 'install.packages("testthat", repos = "https://cloud.r-project.org"); stopifnot(requireNamespace("testthat", quietly = TRUE))'
       - name: Run R tests
         env:
           RETICULATE_PYTHON: ${{ env.pythonLocation }}/bin/python
         run: Rscript -e 'testthat::test_local("r/causalCalibration")'
+      - name: Install system dependency for R isotonic smoke test
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libpng-dev
+      - name: Install reticulate for optional isotonic smoke test
+        run: Rscript -e 'install.packages("reticulate", repos = "https://cloud.r-project.org"); stopifnot(requireNamespace("reticulate", quietly = TRUE))'
       - name: Optional isotonic smoke test
         env:
           RETICULATE_PYTHON: ${{ env.pythonLocation }}/bin/python
