@@ -1,0 +1,81 @@
+---
+title: "Getting Started"
+---
+
+# Installation
+
+Python:
+
+```bash
+python3 -m pip install -e python
+```
+
+R:
+
+```r
+install.packages("r/causalCalibration", repos = NULL, type = "source")
+```
+
+# Mental model
+
+This package does not train a treatment-effect learner for you.
+
+Instead, it calibrates predictions from a learner you already have. The package expects you to bring:
+
+- a treatment-effect prediction vector,
+- observed treatment and outcome data,
+- nuisance estimates needed by the chosen loss,
+- and, for cross-calibration, a matrix of fold-specific predictions.
+
+## The package workflow
+
+1. Train or otherwise obtain a treatment-effect predictor.
+2. Compute the nuisance estimates required by the calibration loss.
+3. Decide whether you want standard calibration or cross-calibration.
+4. Fit the calibrator.
+5. Predict calibrated effect scores.
+6. Diagnose remaining miscalibration.
+
+# Which function should I use?
+
+## Use `fit_calibrator()` when
+
+- you have one prediction per observation,
+- ordinary calibration is enough for your workflow,
+- or you are calibrating on a separate calibration sample.
+
+## Use `fit_cross_calibrator()` when
+
+- your learner produced cross-fitted predictions,
+- you want to fit and calibrate in sample,
+- and you have both pooled OOF predictions and fold-specific predictions.
+
+## Use `diagnose_calibration()` when
+
+- you want to quantify remaining calibration error,
+- compare raw and calibrated predictions,
+- or understand whether your calibration choice is stable under your overlap conditions.
+
+# Workflow objects at a glance
+
+| Object | Meaning | Used by |
+|---|---|---|
+| `predictions` | One score per observation | `fit_calibrator`, `fit_cross_calibrator`, `diagnose_calibration` |
+| `fold_predictions` | `n x K` matrix of fold-specific predictions | `fit_cross_calibrator`, `predict(cross_calibrator, ...)` |
+| `mu0`, `mu1`, `propensity` | DR-loss nuisance inputs | `loss="dr"` |
+| `outcome_mean`, `propensity` | R-loss nuisance inputs | `loss="r"` |
+
+# First recommendation
+
+For most users, the best starting workflow is:
+
+- `loss="dr"`
+- `method="isotonic"`
+- cross-calibration when cross-fitted predictions are available
+
+Then use diagnostics to check whether weak overlap suggests moving to `loss="r"` for a more overlap-focused target.
+
+# Full examples
+
+- Python notebook: [examples/python-workflow.ipynb](../examples/python-workflow.ipynb)
+- R vignette: [r/causalCalibration/vignettes/getting-started.Rmd](../r/causalCalibration/vignettes/getting-started.Rmd)

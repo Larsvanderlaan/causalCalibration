@@ -1,0 +1,24 @@
+Package: causalCalibration
+Type: Package
+Title: Causal Calibration for Heterogeneous Treatment Effects
+Version: 1.0.0
+Authors@R: c(
+    person(given = "Lars", family = "van der Laan", role = c("aut", "cre"), email = "lvdlaan@uw.edu")
+  )
+Description: Production-ready causal calibration, cross-calibration, and
+    doubly robust calibration diagnostics for heterogeneous treatment effect
+    predictors. The package provides framework-agnostic tooling for the methods
+    introduced in the causal isotonic calibration paper and companion
+    calibration-error diagnostics literature.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: false
+Depends:
+    R (>= 4.1.0)
+Suggests:
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0)
+VignetteBuilder: knitr
+RoxygenNote: 7.3.2
+Config/testthat/edition: 3

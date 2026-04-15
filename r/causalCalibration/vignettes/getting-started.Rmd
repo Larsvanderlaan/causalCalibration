@@ -1,0 +1,145 @@
+---
+title: "causalCalibration Workflow"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{causalCalibration Workflow}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+if (!requireNamespace("causalCalibration", quietly = TRUE)) {
+  repo_root <- normalizePath(file.path(getwd()), winslash = "/", mustWork = TRUE)
+  if (!dir.exists(file.path(repo_root, "R")) && dir.exists(file.path(repo_root, "..", "..", "..", "..", "R"))) {
+    repo_root <- normalizePath(file.path(repo_root, "..", "..", "..", ".."), winslash = "/", mustWork = TRUE)
+  }
+  source(file.path(repo_root, "r", "causalCalibration", "R", "utils.R"))
+  source(file.path(repo_root, "r", "causalCalibration", "R", "methods.R"))
+  source(file.path(repo_root, "r", "causalCalibration", "R", "fit_calibrator.R"))
+  source(file.path(repo_root, "r", "causalCalibration", "R", "fit_cross_calibrator.R"))
+  source(file.path(repo_root, "r", "causalCalibration", "R", "diagnostics.R"))
+} else {
+  library(causalCalibration)
+}
+set.seed(11)
+```
+
+# Overview
+
+This vignette shows the full package workflow:
+
+- simulate a paper-style treatment-effect problem,
+- construct raw and cross-fitted prediction objects,
+- fit ordinary calibration,
+- fit cross-calibration in sample,
+- compare predictions,
+- and interpret diagnostics.
+
+# Simulate a paper-style problem
+
+```{r}
+n <- 180
+w <- runif(n, -1, 1)
+propensity <- plogis(1.6 * w)
+treatment <- rbinom(n, size = 1, prob = propensity)
+
+tau_true <- 0.4 + 0.9 * w + 0.25 * sin(3 * w)
+mu0 <- -0.2 + 0.6 * w
+mu1 <- mu0 + tau_true
+outcome_mean <- (1 - propensity) * mu0 + propensity * mu1
+outcome <- ifelse(treatment == 1, mu1, mu0) + rnorm(n, sd = 0.18)
+
+tau_raw <- 0.55 + 1.35 * tau_true + 0.25 * (w > 0) - 0.15 * cos(4 * w)
+
+k_folds <- 5
+fold_ids <- ((seq_len(n) - 1) %% k_folds) + 1
+tau_fold_matrix <- sapply(seq_len(k_folds), function(fold) {
+  tau_raw + 0.08 * (fold - 3) + 0.05 * sin((fold + 1) * w)
+})
+tau_oof <- tau_fold_matrix[cbind(seq_len(n), fold_ids)]
+tau_new <- tau_raw + 0.03 * sin(6 * w)
+```
+
+# Ordinary calibration
+
+```{r}
+calibrator <- fit_calibrator(
+  predictions = tau_raw,
+  treatment = treatment,
+  outcome = outcome,
+  mu0 = mu0,
+  mu1 = mu1,
+  propensity = propensity,
+  loss = "dr",
+  method = "isotonic"
+)
+
+tau_calibrated <- predict(calibrator, tau_new)
+summary(calibrator)
+head(tau_calibrated)
+```
+
+# Cross-calibration
+
+Cross-calibration is the central in-sample workflow when your learner produced cross-fitted predictions.
+
+- `predictions = tau_oof` are the pooled out-of-fold predictions used to fit the calibration map.
+- `fold_predictions = tau_fold_matrix` is the full `n x K` matrix used for prediction-time aggregation.
+
+```{r}
+cross_calibrator <- fit_cross_calibrator(
+  predictions = tau_oof,
+  fold_predictions = tau_fold_matrix,
+  treatment = treatment,
+  outcome = outcome,
+  mu0 = mu0,
+  mu1 = mu1,
+  propensity = propensity,
+  loss = "dr",
+  method = "isotonic"
+)
+
+tau_cross_calibrated <- predict(cross_calibrator, tau_fold_matrix)
+summary(cross_calibrator)
+head(tau_cross_calibrated)
+```
+
+# Compare predictions
+
+```{r}
+head(data.frame(
+  raw = round(tau_raw, 3),
+  ordinary = round(predict(calibrator, tau_raw), 3),
+  cross = round(tau_cross_calibrated, 3),
+  truth = round(tau_true, 3)
+))
+```
+
+# Diagnostics
+
+```{r}
+diagnostics <- diagnose_calibration(
+  predictions = tau_cross_calibrated,
+  comparison_predictions = tau_raw,
+  treatment = treatment,
+  outcome = outcome,
+  mu0 = mu0,
+  mu1 = mu1,
+  propensity = propensity,
+  curve_method = "histogram",
+  fold_ids = fold_ids
+)
+
+summary(diagnostics)
+```
+
+# What population is being calibrated?
+
+The example above uses `loss = "dr"`, which targets calibration in the original study population. This is the natural choice when you want the calibrated scale to correspond to the observed population, but it relies on inverse-propensity weighting and can become less stable under weak overlap.
+
+If overlap is weak, `loss = "r"` may be more robust because the R-loss weighting emphasizes the overlap region. The tradeoff is interpretational: the calibrated scores then target an overlap-weighted population rather than the original study population.
+
+As a rule of thumb:
+
+- choose `dr` when original-population targeting matters and overlap is adequate,
+- choose `r` when overlap is weak and overlap-weighted targeting is acceptable.

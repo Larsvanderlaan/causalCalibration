@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+title: causalCalibration
+message: "If you use this software, please cite the package and the causal calibration paper."
+type: software
+authors:
+  - family-names: van der Laan
+    given-names: Lars
+repository-code: "https://github.com/Larsvanderlaan/causalCalibration"
+license: MIT
+preferred-citation:
+  type: conference-paper
+  authors:
+    - family-names: van der Laan
+      given-names: Lars
+    - family-names: Ulloa-Perez
+      given-names: Ernesto
+    - family-names: Carone
+      given-names: Marco
+    - family-names: Luedtke
+      given-names: Alex
+  title: Causal Isotonic Calibration for Heterogeneous Treatment Effects
+  year: 2023
+  publisher: Proceedings of Machine Learning Research
+  url: "https://proceedings.mlr.press/v202/van-der-laan23a.html"

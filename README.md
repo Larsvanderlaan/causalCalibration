@@ -1,89 +1,113 @@
-# causalCalibration: Causal Isotonic Calibration for Heterogeneous Treatment Effects
+# causalCalibration
 
-Provides R code implementing causal isotonic calibration and cross-calibration as described 
-in the manuscript "Causal Isotonic Calibration for Heterogeneous Treatment Effects" by Lars van der Laan, Ernesto Ulloa, Marco Carone, and Alex Luedtke.
+Production-ready causal calibration tooling for heterogeneous treatment effect models, with native R and Python packages, cross-calibration support, and doubly robust calibration diagnostics.
 
-A preprint describing methods and algorithms can be found at this link: https://arxiv.org/abs/2302.14011.
-This work was published in the International Conference on Machine Learning (ICML) (2023) and can be found here: https://proceedings.mlr.press/v202/van-der-laan23a/van-der-laan23a.pdf
+## Legacy branch
 
-See the vignette for code examples.
+The original paper-era implementation has been preserved on the `main_deprecated` branch. If you need the historical ICML 2023 code exactly as it previously lived in this repository, use that branch directly.
 
+## Repository layout
 
+- `r/causalCalibration`: R package
+- `python`: Python package
+- `docs`: Quarto user guides and method notes
+- `examples`: runnable end-to-end Python workflow materials
+- `shared/fixtures`: shared inputs and expected outputs for parity tests
+
+## Supported calibration losses
+
+- `dr`: doubly robust/AIPW pseudo-outcome calibration
+- `r`: residualized R-loss calibration
+
+## Supported calibration methods
+
+- `isotonic`
+- `smooth_isotonic`
+- `linear`
+- `histogram`
+
+## Install
+
+Python:
+
+```bash
+python3 -m pip install -e python
 ```
-install.packages(“devtools”)
-library(devtools)
-install_github(“larsvanderlaan/causalCalibration”)
+
+R:
+
+```r
+install.packages("r/causalCalibration", repos = NULL, type = "source")
+```
+
+## Quick start
+
+User-facing workflow docs:
+
+- [Overview](./docs/index.qmd)
+- [Getting Started](./docs/getting-started.qmd)
+- [Standard Calibration](./docs/standard-calibration.qmd)
+- [Cross-Calibration](./docs/cross-calibration.qmd)
+- [Diagnostics](./docs/diagnostics.qmd)
+- [Losses and Methods](./docs/choosing-losses-and-methods.qmd)
+- [API Reference](./docs/reference.qmd)
+
+Source examples:
+
+- Python notebook: [examples/python-workflow.ipynb](./examples/python-workflow.ipynb)
+- R vignette: [getting-started.Rmd](./r/causalCalibration/vignettes/getting-started.Rmd)
+
+Python:
+
+```python
+from causal_calibration import fit_calibrator, diagnose_calibration
+
+calibrator = fit_calibrator(
+    predictions=tau_hat,
+    treatment=a,
+    outcome=y,
+    mu0=mu0_hat,
+    mu1=mu1_hat,
+    propensity=e_hat,
+    loss="dr",
+    method="isotonic",
+)
+
+tau_calibrated = calibrator.predict(tau_new)
+
+diagnostics = diagnose_calibration(
+    predictions=tau_calibrated,
+    comparison_predictions=tau_hat,
+    treatment=a,
+    outcome=y,
+    mu0=mu0_hat,
+    mu1=mu1_hat,
+    propensity=e_hat,
+)
+```
+
+R:
+
+```r
 library(causalCalibration)
-install_github(“tlverse/sl3”)
-library(sl3)
 
-set.seed(123)
-n <- 1000
-W <- runif(n, -1 , 1)
-pA1 <- plogis(2*W)
-A <- rbinom(n, size = 1, pA1)
-CATE <- 1 + W
-EY0 <- W
-EY1 <- W + CATE
-Y <- rnorm(n, W + A * CATE, 0.3)
+calibrator <- fit_calibrator(
+  predictions = tau_hat,
+  treatment = a,
+  outcome = y,
+  mu0 = mu0_hat,
+  mu1 = mu1_hat,
+  propensity = e_hat,
+  loss = "dr",
+  method = "isotonic"
+)
 
-# Initial cross-fitted learner of CATE
-data <- data.frame(W, A, Y)
-K <- 10 # 10-fold cross-fitting
-task <- sl3_Task$new(data, covariates = c("W"), outcome = "Y", folds = K) # sl3_Task for T-learner
-tmp <- task$folds # used to generate folds internally
-
-# crossfit gam learner using sl3
-lrnr <- Lrnr_cv$new(Lrnr_gam$new())
-
-# Compute T-learner for CATE.
-lrnr_trained_A0 <- lrnr$train(task[A==0])
-lrnr_trained_A1 <- lrnr$train(task[A==1])
-
-# get pooled out-of-fold predictions
-initial_CATE_preds_pooled <- lrnr_trained_A1$predict(task) - lrnr_trained_A0$predict(task)
-
-# train calibrator
-calibrator <- causalCalibrate(tau, A, Y, EY1, EY0, pA1, tau_pred = initial_CATE_preds_pooled)
-
-
-#generate new dataset to obtain calibrated predictions
-n <- 200
-W <- runif(n, -1 , 1)
-new_data <- data.frame(W)
-
-# new task
-new_task <- sl3_Task$new(new_data, covariates = c("W"), outcome = c(), folds = 10)
-
-# get matrix of fold-specific initial CATE predictions from new task
-initial_CATE_cfpreds_mat <- do.call(cbind, lapply(1:K, function(k) {
-  # get predictions using learner trained on kth training set
-  tau_k <- lrnr_trained_A1$predict_fold(new_task, k) - lrnr_trained_A0$predict_fold(new_task, k)
-  return(tau_k)
-}))
-# use cross_calibrate to collapse the predictions from the K initial cross-fitted CATE predictors into a single calibrated prediction. 
-new_CATE_preds_crosscalibrated <- cross_calibrate(calibrator, initial_CATE_cfpreds_mat)
-plot(W,  new_CATE_preds_crosscalibrated)
-
-
-
-
+tau_calibrated <- predict(calibrator, tau_new)
 ```
 
-## Citation
+## Method references
 
-To reference this work, please use the following bibtex citation:
-
-```
-@inproceedings{van2023causal,
-  title={Causal isotonic calibration for heterogeneous treatment effects},
-  author={{van der Laan}, Lars and Ulloa-P{\'e}rez, Ernesto and Carone, Marco and Luedtke, Alex},
-  booktitle={Proceedings of the 40th International Conference on Machine Learning (ICML)},
-  year={2023},
-  address={Honolulu, Hawaii, USA},
-  publisher={PMLR},
-  volume={202},
-    pdf={https://proceedings.mlr.press/v202/van-der-laan23a/van-der-laan23a.pdf}
-}
-
-```
+- ICML 2023 paper: [Causal Isotonic Calibration for Heterogeneous Treatment Effects](https://proceedings.mlr.press/v202/van-der-laan23a.html)
+- AISTATS 2022 paper: [Calibration Error for Heterogeneous Treatment Effects](https://arxiv.org/abs/2203.13364)
+- R-learner target weighting: [Nie and Wager (2021)](https://academic.oup.com/biomet/article/108/2/299/5911092)
+- DR-learner theory: [Kennedy (2020)](https://doi.org/10.48550/arXiv.2004.14497)

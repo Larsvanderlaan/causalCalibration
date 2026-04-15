@@ -1,0 +1,77 @@
+---
+title: "Choosing Losses and Methods"
+---
+
+# What population is being calibrated?
+
+This is the most important conceptual choice in the package.
+
+## `loss="dr"`
+
+`loss="dr"` calibrates to the original study population. This is the most natural target when you want calibrated scores to reflect the effect scale for the actual observed population.
+
+However, the DR-loss relies on inverse-propensity weighting. That makes it more sensitive when overlap is weak or propensities get close to `0` or `1`.
+
+In practice:
+
+- target: original / observed population
+- strength: direct population-level interpretation
+- caveat: inverse-propensity weighting can become unstable under poor overlap
+
+This aligns with the doubly robust treatment-effect construction used in the causal calibration paper and DR-learner literature, including [van der Laan et al. (2023)](https://proceedings.mlr.press/v202/van-der-laan23a.html) and [Kennedy (2020)](https://doi.org/10.48550/arXiv.2004.14497).
+
+## `loss="r"`
+
+`loss="r"` calibrates using the R-loss weighting induced by `(A - e(W))^2`. That means the calibration problem places more emphasis on observations in the overlap or equipoise region.
+
+This usually makes the calibration workflow more robust when overlap is weak, but it changes the calibration target: calibrated scores should be interpreted as calibrated for an overlap-weighted population rather than the original study population.
+
+In practice:
+
+- target: overlap-weighted population
+- strength: often more robust under weak overlap
+- caveat: the target population is no longer the original observed population
+
+This interpretation follows the R-learner weighting structure of [Nie and Wager (2021)](https://academic.oup.com/biomet/article/108/2/299/5911092). In the documentation, treat this as a consequence of the weighting scheme, not as a package-specific redefinition of calibration.
+
+## Short recommendation
+
+> Choose `r` when overlap is weak and overlap-population targeting is acceptable. Choose `dr` when you want calibration in the original population and overlap is adequate.
+
+# Choosing a calibration method
+
+## `isotonic`
+
+Best default when you want a monotone nonparametric calibration map with minimal assumptions.
+
+## `smooth_isotonic`
+
+Use when you want the monotone behavior of isotonic calibration with a smoother prediction surface.
+
+## `linear`
+
+Use when you want a simple parametric recalibration step and easy interpretation.
+
+## `histogram`
+
+Use when you want a coarse, transparent piecewise-constant map or a simple diagnostic baseline.
+
+# Choosing standard calibration vs cross-calibration
+
+## Prefer standard calibration when
+
+- you already have a clean calibration sample,
+- or you only have one prediction per unit.
+
+## Prefer cross-calibration when
+
+- your learner was trained with cross-fitting,
+- you have pooled OOF predictions and fold-specific predictions,
+- and you want to fit and calibrate in sample without a separate holdout calibration split.
+
+# Diagnostics and overlap
+
+If overlap is weak, diagnostics should be interpreted together with the loss choice:
+
+- a `dr` diagnostic targets the original population but may be noisier because of inverse-propensity behavior,
+- an `r` fit may be more stable in overlap-poor regions, but its calibrated scores answer a different target-population question.

@@ -1,0 +1,69 @@
+---
+title: "Standard Calibration"
+---
+
+# When standard calibration is the right tool
+
+Use standard calibration when you want a single calibration map from one prediction per observation.
+
+This is the simplest route when:
+
+- you already have a dedicated calibration split,
+- you are calibrating predictions on a held-out sample,
+- or you do not have fold-specific prediction matrices available.
+
+# Minimal workflow
+
+```python
+from causal_calibration import fit_calibrator
+
+calibrator = fit_calibrator(
+    predictions=tau_hat,
+    treatment=a,
+    outcome=y,
+    mu0=mu0_hat,
+    mu1=mu1_hat,
+    propensity=e_hat,
+    loss="dr",
+    method="isotonic",
+)
+
+tau_calibrated = calibrator.predict(tau_hat_new)
+```
+
+```r
+calibrator <- fit_calibrator(
+  predictions = tau_hat,
+  treatment = a,
+  outcome = y,
+  mu0 = mu0_hat,
+  mu1 = mu1_hat,
+  propensity = e_hat,
+  loss = "dr",
+  method = "isotonic"
+)
+
+tau_calibrated <- predict(calibrator, tau_hat_new)
+```
+
+# What this does
+
+The calibrator learns a mapping from raw treatment-effect scores to calibrated scores. After fitting, any future prediction can be passed through that map with `predict()`.
+
+# What standard calibration does not do
+
+Standard calibration does not reconstruct fold-specific prediction behavior. If your upstream HTE learner was trained with cross-fitting and you want to preserve that structure in-sample, cross-calibration is the better fit.
+
+# Recommended interpretation workflow
+
+1. Inspect the raw prediction range.
+2. Fit a calibrator.
+3. Compare raw and calibrated predictions on the same observations.
+4. Run `diagnose_calibration()` to quantify how much miscalibration remains.
+5. Revisit the loss choice if overlap looks weak.
+
+# See also
+
+- [Cross-Calibration](cross-calibration.qmd)
+- [Losses and Methods](choosing-losses-and-methods.qmd)
+- [API Reference](reference.qmd)

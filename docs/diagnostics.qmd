@@ -1,0 +1,87 @@
+---
+title: "Diagnostics"
+---
+
+# What diagnostics answer
+
+`diagnose_calibration()` estimates how far a prediction rule is from being calibrated under the package’s doubly robust calibration-error framework.
+
+Use it to answer:
+
+- Is my raw predictor visibly miscalibrated?
+- Did calibration improve things?
+- How uncertain is the estimated calibration error?
+
+# Inputs
+
+Diagnostics take:
+
+- a prediction vector,
+- treatment and outcome,
+- nuisance estimates,
+- and optionally a second prediction vector for before/after comparisons.
+
+Diagnostics do not take learner objects. They work on the outputs of a learner, not the learner itself.
+
+# Included outputs
+
+- estimated calibration curve,
+- debiased L2 calibration error estimate,
+- plugin estimate,
+- deterministic K-fold jackknife standard error,
+- confidence interval,
+- optional raw-vs-calibrated comparison.
+
+# Inference details
+
+Jackknife standard errors reuse supplied fold IDs when available. Otherwise the package builds deterministic balanced folds with `K = 100` by default.
+
+For the debiasing correction:
+
+- `linear` uses cheap exact leave-one-out updates,
+- `histogram` uses cheap within-bin leave-one-out corrections with fixed bin boundaries,
+- `isotonic` and `smooth_isotonic` use K-fold out-of-fold refits.
+
+# Reading the output
+
+## Small calibration error
+
+This suggests the prediction rule is close to self-calibrated under the chosen target population and nuisance estimates.
+
+## Large calibration error
+
+This suggests the prediction scale is still not directly interpretable as an average treatment effect for units sharing the same calibrated score.
+
+## Before/after comparisons
+
+Use `comparison_predictions` to compare a raw predictor to a calibrated predictor on the same sample.
+
+# Example
+
+```python
+diagnostics = diagnose_calibration(
+    predictions=tau_cross_calibrated,
+    comparison_predictions=tau_raw,
+    treatment=a,
+    outcome=y,
+    mu0=mu0_hat,
+    mu1=mu1_hat,
+    propensity=e_hat,
+)
+```
+
+```r
+diagnostics <- diagnose_calibration(
+  predictions = tau_cross_calibrated,
+  comparison_predictions = tau_raw,
+  treatment = a,
+  outcome = y,
+  mu0 = mu0_hat,
+  mu1 = mu1_hat,
+  propensity = e_hat
+)
+```
+
+# Important caveat
+
+Diagnostics are only as good as the nuisance inputs and prediction vectors they receive. In practice, you should prefer cross-fitted nuisance estimates whenever possible.

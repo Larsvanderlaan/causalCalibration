@@ -1,0 +1,28 @@
+project:
+  type: website
+
+website:
+  title: causalCalibration
+  navbar:
+    left:
+      - href: index.qmd
+        text: Overview
+      - href: getting-started.qmd
+        text: Getting Started
+      - href: standard-calibration.qmd
+        text: Standard Calibration
+      - href: cross-calibration.qmd
+        text: Cross-Calibration
+      - href: diagnostics.qmd
+        text: Diagnostics
+      - href: choosing-losses-and-methods.qmd
+        text: Losses and Methods
+      - href: reference.qmd
+        text: API Reference
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+    code-copy: true
+    code-overflow: wrap

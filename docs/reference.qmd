@@ -1,0 +1,73 @@
+---
+title: "API Reference"
+---
+
+# Core fitting functions
+
+## `fit_calibrator()`
+
+Use when you have one prediction per unit and want a single calibration map.
+
+### Required by loss
+
+- `loss="dr"`: `mu0`, `mu1`, `propensity`
+- `loss="r"`: `outcome_mean`, `propensity`
+
+### Common mistakes
+
+- supplying raw learner objects instead of prediction vectors,
+- forgetting `outcome_mean` for `loss="r"`,
+- using non-binary treatment indicators.
+
+## `fit_cross_calibrator()`
+
+Use when you want cross-calibration for cross-fitted treatment-effect predictions.
+
+### Contract
+
+- `predictions`: pooled out-of-fold predictions used to fit the calibration map
+- `fold_predictions`: `n x K` matrix used for calibrated aggregation at prediction time
+
+### Common mistakes
+
+- swapping `predictions` and `fold_predictions`,
+- passing a single-column matrix when the intended workflow is cross-calibration,
+- forgetting that prediction later also expects a fold-specific matrix.
+
+## `diagnose_calibration()`
+
+Use when you want a calibration curve, a scalar error estimate, and uncertainty quantification.
+
+### Inputs
+
+- prediction vector,
+- treatment and outcome,
+- nuisance estimates,
+- optional comparison vector.
+
+### Interpretation
+
+The meaning of the result depends on the target population implied by your loss and nuisance structure. See [Losses and Methods](choosing-losses-and-methods.qmd).
+
+# Object behavior
+
+## `Calibrator`
+
+- `predict(...)`: apply the fitted calibration map
+- `summary()`: lightweight metadata summary
+- plotting: visualize the fitted calibration map
+
+## `CrossCalibrator`
+
+- `predict(...)`: apply the map to a fold-specific matrix and aggregate with the order-statistic median
+- `summary()`: metadata summary including fold count
+
+## `CalibrationDiagnostics`
+
+- `summary()`: scalar results and intervals
+- `curve_frame()` / plotting helpers: calibration-curve outputs for visualization
+
+# Reference examples
+
+- Python workflow notebook: [examples/python-workflow.ipynb](../examples/python-workflow.ipynb)
+- R vignette: [r/causalCalibration/vignettes/getting-started.Rmd](../r/causalCalibration/vignettes/getting-started.Rmd)

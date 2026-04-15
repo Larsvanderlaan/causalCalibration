@@ -1,0 +1,58 @@
+---
+title: "causalCalibration"
+---
+
+# Overview
+
+`causalCalibration` is a workflow-oriented package for calibrating heterogeneous treatment effect predictions after you have already trained a treatment-effect model.
+
+It is designed for applied researchers who:
+
+- already have treatment-effect predictions from some learner,
+- want calibrated effect scores they can interpret more directly,
+- want to avoid spending a separate holdout split on calibration when cross-fitted predictions are available,
+- want diagnostics that quantify how much miscalibration remains.
+
+## Main workflows
+
+### Standard calibration
+
+Use `fit_calibrator()` when you have one prediction per observation and want a single calibration map.
+
+This is the simplest workflow when you have:
+
+- a vector of effect predictions,
+- treatment and outcome data,
+- nuisance estimates for the chosen loss.
+
+### Cross-calibration
+
+Use `fit_cross_calibrator()` when your underlying HTE model was trained with cross-fitting and you want to fit and calibrate in sample without carving out a separate calibration set.
+
+Cross-calibration uses:
+
+- pooled out-of-fold predictions to fit the calibration map,
+- an `n x K` matrix of fold-specific predictions to produce calibrated predictions.
+
+That lets you use all observations for the combined fit-and-calibrate workflow while still keeping prediction-time aggregation out of fold.
+
+## Documentation map
+
+- [Getting Started](getting-started.qmd): installation, mental model, and the package workflow at a glance
+- [Standard Calibration](standard-calibration.qmd): when to use ordinary calibration and how to fit it
+- [Cross-Calibration](cross-calibration.qmd): the central in-sample workflow for cross-fitted predictors
+- [Diagnostics](diagnostics.qmd): how to quantify remaining miscalibration and interpret the outputs
+- [Losses and Methods](choosing-losses-and-methods.qmd): how to choose `dr` vs `r` and which calibrator to use
+- [API Reference](reference.qmd): function-by-function contracts, argument requirements, and common mistakes
+
+## Source workflows
+
+- Python notebook: [examples/python-workflow.ipynb](../examples/python-workflow.ipynb)
+- R vignette: [r/causalCalibration/vignettes/getting-started.Rmd](../r/causalCalibration/vignettes/getting-started.Rmd)
+
+## Method references
+
+- Causal calibration and cross-calibration: [van der Laan et al. (2023)](https://proceedings.mlr.press/v202/van-der-laan23a.html)
+- R-learner: [Nie and Wager (2021)](https://academic.oup.com/biomet/article/108/2/299/5911092)
+- DR-learner theory: [Kennedy (2020)](https://doi.org/10.48550/arXiv.2004.14497)
+- Calibration error estimation: [Xu and Yadlowsky (2022)](https://arxiv.org/abs/2203.13364)
