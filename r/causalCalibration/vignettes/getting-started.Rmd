@@ -13,11 +13,12 @@ if (!requireNamespace("causalCalibration", quietly = TRUE)) {
   if (!dir.exists(file.path(repo_root, "R")) && dir.exists(file.path(repo_root, "..", "..", "..", "..", "R"))) {
     repo_root <- normalizePath(file.path(repo_root, "..", "..", "..", ".."), winslash = "/", mustWork = TRUE)
   }
-  source(file.path(repo_root, "r", "causalCalibration", "R", "utils.R"))
-  source(file.path(repo_root, "r", "causalCalibration", "R", "methods.R"))
-  source(file.path(repo_root, "r", "causalCalibration", "R", "fit_calibrator.R"))
-  source(file.path(repo_root, "r", "causalCalibration", "R", "fit_cross_calibrator.R"))
-  source(file.path(repo_root, "r", "causalCalibration", "R", "diagnostics.R"))
+  source_files <- list.files(
+    file.path(repo_root, "r", "causalCalibration", "R"),
+    pattern = "[.][Rr]$",
+    full.names = TRUE
+  )
+  invisible(lapply(source_files, source))
 } else {
   library(causalCalibration)
 }

@@ -48,13 +48,14 @@ For `method = "isotonic"` in R, also install `reticulate` and make sure the acti
 
 User-facing website:
 
-- [Package website](./docs/index.html)
+- [Package website](https://larsvanderlaan.github.io/causalCalibration/)
 
 Source examples:
 
 - Python notebook: [examples/python-workflow.ipynb](./examples/python-workflow.ipynb)
 - R vignette: [getting-started.Rmd](./r/causalCalibration/vignettes/getting-started.Rmd)
 - Method notes: [docs/getting-started.qmd](./docs/getting-started.qmd), [docs/standard-calibration.qmd](./docs/standard-calibration.qmd), [docs/cross-calibration.qmd](./docs/cross-calibration.qmd), [docs/diagnostics.qmd](./docs/diagnostics.qmd), [docs/choosing-losses-and-methods.qmd](./docs/choosing-losses-and-methods.qmd), [docs/reference.qmd](./docs/reference.qmd)
+- Release checklist: [RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md)
 
 ## v1.1 highlights
 
