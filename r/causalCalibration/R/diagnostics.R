@@ -80,7 +80,7 @@
     }
   }
   plugin_terms <- (fitted - predictions)^2
-  robust_terms <- (oof_curve - predictions)^2 + 2 * (oof_curve - predictions) * (pseudo_outcome - oof_curve)
+  robust_terms <- (pseudo_outcome - predictions) * (oof_curve - predictions)
   list(
     model = model,
     fitted = fitted,

@@ -26,7 +26,7 @@ Diagnostics do not take learner objects.
 # Included outputs
 
 - estimated calibration curve,
-- debiased L2 calibration error estimate,
+- robust L2 calibration error estimate,
 - plugin estimate,
 - deterministic K-fold jackknife standard error,
 - confidence interval,
@@ -37,10 +37,13 @@ Diagnostics do not take learner objects.
 
 Jackknife standard errors reuse supplied fold IDs when available. Otherwise the package builds deterministic balanced folds with `K = 100` by default.
 
-For the debiasing correction:
+For the robust estimator, the package uses the paper's Eq. (2.4),
+`mean((Gamma_i - Delta_i) * (gamma_hat_oof(Delta_i) - Delta_i))`,
+with practical out-of-fold curve estimates:
 
-- `linear` uses cheap exact leave-one-out updates,
-- `histogram` uses cheap within-bin leave-one-out corrections with fixed bin boundaries,
+- `Gamma_i` is the DR or overlap-targeted pseudo-outcome, depending on `target_population`.
+- `linear` uses cheap exact leave-one-out updates.
+- `histogram` uses cheap within-bin leave-one-out corrections with fixed bin boundaries.
 - `isotonic` and `monotone_spline` use K-fold out-of-fold refits.
 
 # Target populations

@@ -127,5 +127,5 @@ cross,r,histogram,prediction,5,0.177777777778
 cross,r,histogram,prediction,6,0.025000000000
 cross,r,histogram,prediction,7,0.142857142857
 cross,r,histogram,prediction,8,0.057142857143
-diagnostics,dr,histogram,estimate,1,0.115446246600
-diagnostics,dr,histogram,standard_error,1,0.066805100996
+diagnostics,dr,histogram,estimate,1,0.116618199657
+diagnostics,dr,histogram,standard_error,1,0.050719881481

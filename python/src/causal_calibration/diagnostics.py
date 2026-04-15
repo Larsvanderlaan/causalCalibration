@@ -137,7 +137,7 @@ def _estimate_curve(
                 oof_curve[index] = value
     plugin_terms = [(fitted_value - prediction) ** 2 for fitted_value, prediction in zip(fitted, predictions)]
     robust_terms = [
-        ((oof_value - prediction) ** 2) + (2.0 * (oof_value - prediction) * (pseudo - oof_value))
+        (pseudo - prediction) * (oof_value - prediction)
         for oof_value, prediction, pseudo in zip(oof_curve, predictions, pseudo_outcome)
     ]
     return {
