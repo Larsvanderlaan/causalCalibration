@@ -6,7 +6,7 @@
     <title>causalCalibration</title>
     <meta
       name="description"
-      content="Causal calibration, cross-calibration, and diagnostics for heterogeneous treatment effect models in Python and R."
+      content="Research-grade causal calibration, cross-calibration, overlap assessment, and diagnostics for heterogeneous treatment effect models in Python and R."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -23,6 +23,7 @@
           <div class="brand"><a href="./index.html">causalCalibration</a></div>
           <div class="toplinks">
             <a href="#start-here">Overview</a>
+            <a href="#docs">Docs</a>
             <a href="#install">Install</a>
             <a href="#calibration">Why Calibration</a>
             <a href="#workflows">Cross vs Standard</a>
@@ -53,9 +54,10 @@
             </div>
             <p class="lede">
               <a href="https://proceedings.mlr.press/v202/van-der-laan23a/van-der-laan23a.pdf"><code>causalCalibration</code></a>
-              calibrates treatment-effect scores after HTE estimation. It implements causal
-              isotonic calibration, pooled cross-calibration, smooth monotone spline
-              calibration, and doubly robust diagnostics in Python and R.
+              calibrates treatment-effect scores after HTE estimation. It implements
+              causal isotonic calibration, pooled cross-calibration, monotone spline
+              calibration, overlap diagnostics, and calibration-error estimation in
+              native Python and R interfaces.
             </p>
             <div class="hero-actions">
               <a class="button button-primary" href="#quickstart">Get started</a>
@@ -66,6 +68,7 @@
               <li>Standard calibration and pooled cross-calibration</li>
               <li><code>dr</code> and <code>r</code> loss targets</li>
               <li>Isotonic, monotone spline, linear, and histogram maps</li>
+              <li>Binary-treatment HTE workflows with external learners</li>
             </ul>
           </section>
 
@@ -79,11 +82,15 @@
                 </div>
                 <div class="hero-stat">
                   <strong>Core use case</strong>
-                  <span>Take a raw CATE score from any learner and map it onto a calibrated effect scale.</span>
+                  <span>Take a raw CATE score from an external learner and map it onto a calibrated effect scale with an explicit target population.</span>
                 </div>
                 <div class="hero-stat">
                   <strong>Cross-calibration</strong>
                   <span>Fit on pooled out-of-fold predictions, then calibrate fold-specific predictions and aggregate by the median.</span>
+                </div>
+                <div class="hero-stat">
+                  <strong>Scope</strong>
+                  <span>The current package is designed for binary-treatment HTE workflows with observed outcomes and user-supplied nuisance estimates.</span>
                 </div>
               </div>
             </div>
@@ -125,6 +132,10 @@ tau_star &lt;- predict(cal, tau_new)</code></pre>
                 package fits a calibration map, returns calibrated scores, and estimates
                 remaining calibration error.
               </p>
+              <p class="section-side-note">
+                The package is intentionally framework-agnostic: it calibrates outputs from
+                an HTE pipeline rather than training the pipeline itself.
+              </p>
             </div>
           </div>
 
@@ -155,10 +166,102 @@ diagnose_calibration(...)</code></pre>
             </article>
           </div>
 
+          <div class="argument-grid scope-grid">
+            <article class="argument-card">
+              <p class="mini-label">Target population</p>
+              <h3>Choose the loss before you choose the method</h3>
+              <p>
+                <code>loss="dr"</code> calibrates to the original study population, while
+                <code>loss="r"</code> calibrates to an overlap-weighted population. The site
+                and package docs keep that distinction explicit throughout.
+              </p>
+            </article>
+            <article class="argument-card">
+              <p class="mini-label">Research scope</p>
+              <h3>Built for binary-treatment CATE workflows</h3>
+              <p>
+                The package currently targets binary treatment, observed outcomes, and
+                externally estimated nuisance functions. That scope is deliberate, and it is
+                the right way to read the guarantees and examples on this site.
+              </p>
+            </article>
+            <article class="argument-card">
+              <p class="mini-label">Diagnostics</p>
+              <h3>Use diagnostics as part of the workflow, not as an afterthought</h3>
+              <p>
+                Calibration fitting and calibration diagnostics are companion tools. The
+                package is designed so users can fit, compare, and report calibrated models
+                with uncertainty rather than only applying a post-hoc map.
+              </p>
+            </article>
+          </div>
+
           <div class="chip-row" style="margin-top: 18px;">
             <a class="chip-link" href="https://github.com/Larsvanderlaan/causalCalibration/blob/main/examples/python-workflow.ipynb">Python notebook</a>
             <a class="chip-link" href="https://github.com/Larsvanderlaan/causalCalibration/blob/main/r/causalCalibration/vignettes/getting-started.Rmd">R vignette</a>
             <a class="chip-link" href="https://proceedings.mlr.press/v202/van-der-laan23a/van-der-laan23a.pdf">Paper PDF</a>
+          </div>
+        </section>
+
+        <section class="section" id="docs">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Documentation</p>
+              <h2>Where should a new user start?</h2>
+              <p>
+                The documentation is organized around the actual applied workflow: choose a
+                target population, decide between standard calibration and cross-calibration,
+                fit the map, and report diagnostics.
+              </p>
+            </div>
+          </div>
+
+          <div class="doc-grid">
+            <article class="doc-card">
+              <p class="mini-label">Start here</p>
+              <h3>Getting started</h3>
+              <p>
+                Scope, required inputs, workflow objects, and the default path for new
+                users.
+              </p>
+              <div class="doc-links">
+                <a class="doc-link" href="./_site/getting-started.html">Open guide</a>
+              </div>
+            </article>
+            <article class="doc-card">
+              <p class="mini-label">In-sample workflow</p>
+              <h3>Cross-calibration</h3>
+              <p>
+                Pooled OOF predictions, fold-specific matrices, validation, and in-sample
+                calibrated prediction generation.
+              </p>
+              <div class="doc-links">
+                <a class="doc-link" href="./_site/cross-calibration.html">Open guide</a>
+              </div>
+            </article>
+            <article class="doc-card">
+              <p class="mini-label">Interpretation</p>
+              <h3>Losses and methods</h3>
+              <p>
+                Target populations, overlap robustness, and when to choose isotonic,
+                monotone spline, linear, or histogram calibration.
+              </p>
+              <div class="doc-links">
+                <a class="doc-link" href="./_site/choosing-losses-and-methods.html">Open guide</a>
+              </div>
+            </article>
+            <article class="doc-card">
+              <p class="mini-label">Reporting</p>
+              <h3>Diagnostics and reference</h3>
+              <p>
+                Calibration-error estimation, target-population summaries, and public API
+                contracts in one place.
+              </p>
+              <div class="doc-links">
+                <a class="doc-link" href="./_site/diagnostics.html">Diagnostics</a>
+                <a class="doc-link" href="./_site/reference.html">Reference</a>
+              </div>
+            </article>
           </div>
         </section>
 
@@ -185,6 +288,7 @@ diagnose_calibration(...)</code></pre>
               <p class="mini-label">Python</p>
               <h3>GitHub install</h3>
               <pre class="inline-code"><code>python3 -m pip install "git+https://github.com/Larsvanderlaan/causalCalibration.git#subdirectory=python"</code></pre>
+              <p class="panel-note">Includes the v1.1 runtime dependencies used by isotonic calibration and plotting helpers.</p>
             </article>
             <article class="argument-card">
               <p class="mini-label">R</p>
@@ -193,6 +297,7 @@ diagnose_calibration(...)</code></pre>
   "Larsvanderlaan/causalCalibration",
   subdir = "r/causalCalibration"
 )</code></pre>
+              <p class="panel-note">The R isotonic backend uses the Python <code>lightgbm</code> package through <code>reticulate</code>.</p>
             </article>
           </div>
         </section>
@@ -240,19 +345,19 @@ diagnose_calibration(...)</code></pre>
                 <svg class="schematic-svg" viewBox="0 0 260 180" role="img" aria-label="Poorly calibrated CATE curve together with a piecewise-constant isotonic calibration map.">
                   <line x1="36" y1="22" x2="36" y2="146" class="axis-line" />
                   <line x1="36" y1="146" x2="232" y2="146" class="axis-line" />
-                  <line x1="52" y1="130" x2="216" y2="34" class="guide-line" />
+                  <path d="M52 128 L74 128 L74 122 L96 122 L96 110 L118 110 L118 92 L144 92 L144 76 L170 76 L170 64 L194 64 L194 50 L216 50" class="guide-line" />
                   <path d="M52 130 C72 126, 88 118, 100 104 C114 88, 126 74, 140 72 C156 70, 170 76, 184 66 C198 56, 206 44, 216 38" class="raw-line" />
                   <path d="M52 132 L74 132 L74 126 L96 126 L96 116 L118 116 L118 98 L144 98 L144 82 L170 82 L170 70 L194 70 L194 54 L216 54" class="cal-line" />
                   <text x="134" y="167" class="axis-label" text-anchor="middle">Raw score</text>
                   <text x="16" y="88" class="axis-label" text-anchor="middle" transform="rotate(-90 16 88)">Average treatment effect</text>
                   <text x="175" y="94" class="legend-label">Poorly calibrated CATE</text>
-                  <text x="182" y="50" class="legend-label">Isotonic fit</text>
+                  <text x="180" y="48" class="legend-label">Isotonic fit</text>
                 </svg>
               </div>
               <p>
-                <code>method="isotonic"</code> fits a piecewise-constant monotone map. It is
-                the most direct implementation of the paper’s calibration idea and the default
-                starting point for many workflows.
+                <code>method="isotonic"</code> fits a monotone LightGBM one-tree map with
+                observation weights and a minimum leaf-size control. It is still the main
+                paper-native starting point, but now with a production-friendly backend.
               </p>
             </article>
 
@@ -263,19 +368,20 @@ diagnose_calibration(...)</code></pre>
                 <svg class="schematic-svg" viewBox="0 0 260 180" role="img" aria-label="Poorly calibrated CATE curve together with a smooth monotone spline calibration fit.">
                   <line x1="36" y1="22" x2="36" y2="146" class="axis-line" />
                   <line x1="36" y1="146" x2="232" y2="146" class="axis-line" />
-                  <line x1="52" y1="130" x2="216" y2="34" class="guide-line" />
+                  <path d="M52 128 C70 124, 88 116, 104 104 C120 90, 136 80, 152 70 C170 58, 192 48, 216 36" class="guide-line" />
                   <path d="M52 130 C72 126, 88 118, 100 104 C114 88, 126 74, 140 72 C156 70, 170 76, 184 66 C198 56, 206 44, 216 38" class="raw-line" />
                   <path d="M52 132 C70 130, 86 124, 102 112 C118 98, 132 88, 146 80 C160 72, 176 66, 192 56 C202 50, 210 44, 216 38" class="cal-line" />
                   <text x="134" y="167" class="axis-label" text-anchor="middle">Raw score</text>
                   <text x="16" y="88" class="axis-label" text-anchor="middle" transform="rotate(-90 16 88)">Average treatment effect</text>
                   <text x="166" y="92" class="legend-label">Poorly calibrated CATE</text>
-                  <text x="184" y="58" class="legend-label">Monotone spline fit</text>
+                  <text x="180" y="54" class="legend-label">Monotone spline fit</text>
                 </svg>
               </div>
               <p>
                 <code>method="monotone_spline"</code> estimates a smooth monotone
                 transformation with a constrained spline fit. Use it when you want monotone
-                calibration without a piecewise-constant map.
+                calibration without a piecewise-constant map and you care about a smoother
+                calibrated surface.
               </p>
             </article>
           </div>
@@ -352,6 +458,7 @@ diagnose_calibration(...)</code></pre>
                 Doubly robust calibration for the original study population. Use it when the
                 calibrated score should target the observed population directly.
               </p>
+              <p class="panel-note">Interpretation: original-population target, with inverse-propensity weighting in the calibration target.</p>
             </article>
             <article class="argument-card">
               <h3><code>loss="r"</code></h3>
@@ -359,6 +466,7 @@ diagnose_calibration(...)</code></pre>
                 R-loss calibration for an overlap-weighted population. It is often more stable
                 under weak overlap, but it targets a different population.
               </p>
+              <p class="panel-note">Interpretation: overlap-weighted target, usually more robust when overlap is poor.</p>
             </article>
             <article class="argument-card">
               <h3><code>method="isotonic"</code></h3>
@@ -407,9 +515,12 @@ diagnose_calibration(...)</code></pre>
             <div class="example-entry">
               <p class="example-label">Python</p>
               <pre class="inline-code"><code>from causal_calibration import (
+    assess_overlap,
     fit_calibrator,
     diagnose_calibration,
 )
+
+overlap = assess_overlap(treatment=a, propensity=e_hat)
 
 cal = fit_calibrator(
     predictions=tau_hat,
@@ -432,6 +543,7 @@ diag = diagnose_calibration(
     mu0=mu0_hat,
     mu1=mu1_hat,
     propensity=e_hat,
+    target_population="both",
 )</code></pre>
             </div>
             <div class="example-entry">
@@ -451,6 +563,8 @@ cal &lt;- fit_calibrator(
 
 tau_star &lt;- predict(cal, tau_new)
 
+overlap &lt;- assess_overlap(treatment = a, propensity = e_hat)
+
 diag &lt;- diagnose_calibration(
   predictions = tau_star,
   comparison_predictions = tau_hat,
@@ -458,7 +572,8 @@ diag &lt;- diagnose_calibration(
   outcome = y,
   mu0 = mu0_hat,
   mu1 = mu1_hat,
-  propensity = e_hat
+  propensity = e_hat,
+  target_population = "both"
 )</code></pre>
             </div>
           </div>
@@ -466,11 +581,11 @@ diag &lt;- diagnose_calibration(
           <div class="callout">
             <strong>Diagnostics are part of the package contract</strong>
             <p>
-              <code>diagnose_calibration()</code> estimates calibration error with a doubly
-              robust procedure and reports uncertainty using balanced jackknife folds. It can
-              compare raw and calibrated predictions directly through
-              <code>comparison_predictions</code>. Use <code>assess_overlap()</code> before
-              fitting when you want a quick overlap severity check and a loss recommendation.
+              <code>diagnose_calibration()</code> estimates calibration error with balanced
+              jackknife uncertainty and can report original-population and
+              overlap-weighted targets in the same object. Use
+              <code>assess_overlap()</code> before fitting when you want a quick overlap
+              severity check and a loss recommendation.
             </p>
           </div>
         </section>
@@ -482,7 +597,7 @@ diag &lt;- diagnose_calibration(
             <p>
               The package is based on the ICML 2023 causal isotonic calibration paper and the
               companion calibration-error literature for HTEs. Related packages from the same
-              ecosystem are linked below.
+              ecosystem are linked below, together with the main methodological references.
             </p>
           </div>
 
