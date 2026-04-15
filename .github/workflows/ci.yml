@@ -121,7 +121,10 @@ jobs:
           python docs/check_rmd_chunks.py r/causalCalibration/vignettes/getting-started.Rmd /tmp/causalCalibration-vignette-check.R
           Rscript /tmp/causalCalibration-vignette-check.R
       - name: Render Quarto docs
-        run: quarto render docs
+        run: |
+          rm -rf docs/_site
+          cd docs
+          quarto render . --output-dir _site
       - name: Stage Pages artifact
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
