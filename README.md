@@ -2,6 +2,8 @@
 
 Production-ready causal calibration tooling for heterogeneous treatment effect models, with native R and Python packages, cross-calibration support, and doubly robust calibration diagnostics.
 
+[Package Website](https://larsvanderlaan.github.io/causalCalibration/)
+
 ## Legacy branch
 
 The original paper-era implementation has been preserved on the `main_deprecated` branch. If you need the historical ICML 2023 code exactly as it previously lived in this repository, use that branch directly.
@@ -10,7 +12,7 @@ The original paper-era implementation has been preserved on the `main_deprecated
 
 - `r/causalCalibration`: R package
 - `python`: Python package
-- `docs`: Quarto user guides and method notes
+- `docs`: static package website and supporting notes
 - `examples`: runnable end-to-end Python workflow materials
 - `shared/fixtures`: shared inputs and expected outputs for parity tests
 
@@ -42,20 +44,15 @@ install.packages("r/causalCalibration", repos = NULL, type = "source")
 
 ## Quick start
 
-User-facing workflow docs:
+User-facing website:
 
-- [Overview](./docs/index.qmd)
-- [Getting Started](./docs/getting-started.qmd)
-- [Standard Calibration](./docs/standard-calibration.qmd)
-- [Cross-Calibration](./docs/cross-calibration.qmd)
-- [Diagnostics](./docs/diagnostics.qmd)
-- [Losses and Methods](./docs/choosing-losses-and-methods.qmd)
-- [API Reference](./docs/reference.qmd)
+- [Package website](./docs/index.html)
 
 Source examples:
 
 - Python notebook: [examples/python-workflow.ipynb](./examples/python-workflow.ipynb)
 - R vignette: [getting-started.Rmd](./r/causalCalibration/vignettes/getting-started.Rmd)
+- Method notes: [docs/getting-started.qmd](./docs/getting-started.qmd), [docs/standard-calibration.qmd](./docs/standard-calibration.qmd), [docs/cross-calibration.qmd](./docs/cross-calibration.qmd), [docs/diagnostics.qmd](./docs/diagnostics.qmd), [docs/choosing-losses-and-methods.qmd](./docs/choosing-losses-and-methods.qmd), [docs/reference.qmd](./docs/reference.qmd)
 
 Python:
 

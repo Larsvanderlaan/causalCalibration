@@ -11,10 +11,12 @@ REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 
 
 class DocsTests(unittest.TestCase):
-    def test_quarto_pages_exist(self) -> None:
+    def test_static_docs_and_workflow_assets_exist(self) -> None:
         for relative_path in (
-            "docs/_quarto.yml",
-            "docs/index.qmd",
+            "docs/index.html",
+            "docs/site.css",
+            "docs/assets/causal-calibration-badge-mark.svg",
+            "docs/assets/causal-calibration-badge.svg",
             "docs/getting-started.qmd",
             "docs/standard-calibration.qmd",
             "docs/cross-calibration.qmd",
@@ -25,6 +27,18 @@ class DocsTests(unittest.TestCase):
             "r/causalCalibration/vignettes/getting-started.Rmd",
         ):
             self.assertTrue(os.path.exists(os.path.join(REPO_ROOT, relative_path)), relative_path)
+
+    def test_static_site_mentions_core_workflows(self) -> None:
+        with open(
+            os.path.join(REPO_ROOT, "docs", "index.html"),
+            encoding="utf-8",
+        ) as handle:
+            page = handle.read()
+        self.assertIn("fit_calibrator()", page)
+        self.assertIn("fit_cross_calibrator()", page)
+        self.assertIn("diagnose_calibration()", page)
+        self.assertIn("Cross vs Standard", page)
+        self.assertIn("losses and methods", page.lower())
 
     def test_method_guide_contains_target_population_language_and_citations(self) -> None:
         with open(
