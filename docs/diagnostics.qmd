@@ -4,7 +4,7 @@ title: "Diagnostics"
 
 # What diagnostics answer
 
-`diagnose_calibration()` estimates how far a prediction rule is from being calibrated under the package’s doubly robust calibration-error framework.
+`diagnose_calibration()` estimates how far a prediction rule is from being calibrated under the package’s calibration-error framework.
 
 Use it to answer:
 
@@ -30,7 +30,8 @@ Diagnostics do not take learner objects. They work on the outputs of a learner, 
 - plugin estimate,
 - deterministic K-fold jackknife standard error,
 - confidence interval,
-- optional raw-vs-calibrated comparison.
+- optional raw-vs-calibrated comparison,
+- overlap diagnostics when propensity scores are supplied.
 
 # Inference details
 
@@ -40,7 +41,17 @@ For the debiasing correction:
 
 - `linear` uses cheap exact leave-one-out updates,
 - `histogram` uses cheap within-bin leave-one-out corrections with fixed bin boundaries,
-- `isotonic` and `smooth_isotonic` use K-fold out-of-fold refits.
+- `isotonic` and `monotone_spline` use K-fold out-of-fold refits.
+
+# Target populations
+
+Diagnostics can answer two different questions:
+
+- `target_population="dr"`: calibration in the original study population via the doubly robust target.
+- `target_population="overlap"`: calibration in the overlap-weighted population aligned with the R-loss target.
+- `target_population="both"`: return both summaries in one object.
+
+This is especially important for `loss="r"` workflows. The fitted calibrator targets the overlap-weighted population, so the overlap-targeted diagnostic is the natural companion summary. The DR diagnostic is still useful when you want to ask how the same predictor behaves for the original population.
 
 # Reading the output
 
@@ -67,6 +78,7 @@ diagnostics = diagnose_calibration(
     mu0=mu0_hat,
     mu1=mu1_hat,
     propensity=e_hat,
+    target_population="both",
 )
 ```
 
@@ -78,7 +90,8 @@ diagnostics <- diagnose_calibration(
   outcome = y,
   mu0 = mu0_hat,
   mu1 = mu1_hat,
-  propensity = e_hat
+  propensity = e_hat,
+  target_population = "both"
 )
 ```
 

@@ -1,13 +1,27 @@
 """Causal calibration for heterogeneous treatment effects."""
 
-from .core import Calibrator, CrossCalibrator, fit_calibrator, fit_cross_calibrator
-from .diagnostics import CalibrationDiagnostics, diagnose_calibration
+from .bundles import CalibrationBundle, CrossFitBundle
+from .core import (
+    Calibrator,
+    CrossCalibrator,
+    fit_calibrator,
+    fit_cross_calibrator,
+    validate_crossfit_bundle,
+)
+from .diagnostics import CalibrationDiagnostics, CalibrationTargetResult, diagnose_calibration
+from .overlap import OverlapDiagnostics, assess_overlap
 
 __all__ = [
+    "CalibrationBundle",
+    "CalibrationDiagnostics",
+    "CalibrationTargetResult",
     "Calibrator",
     "CrossCalibrator",
-    "CalibrationDiagnostics",
+    "CrossFitBundle",
+    "OverlapDiagnostics",
+    "assess_overlap",
     "diagnose_calibration",
     "fit_calibrator",
     "fit_cross_calibrator",
+    "validate_crossfit_bundle",
 ]

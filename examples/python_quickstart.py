@@ -1,6 +1,6 @@
 """Minimal Python example."""
 
-from causal_calibration import diagnose_calibration, fit_calibrator
+from causal_calibration import assess_overlap, diagnose_calibration, fit_calibrator
 
 
 predictions = [0.2, 0.8, 0.1, 0.6]
@@ -22,6 +22,7 @@ calibrator = fit_calibrator(
 )
 
 print(calibrator.predict(predictions))
+print(assess_overlap(treatment=treatment, propensity=propensity).summary())
 
 diagnostics = diagnose_calibration(
     predictions=predictions,
@@ -30,6 +31,7 @@ diagnostics = diagnose_calibration(
     mu0=mu0,
     mu1=mu1,
     propensity=propensity,
+    target_population="both",
 )
 
 print(diagnostics.summary())

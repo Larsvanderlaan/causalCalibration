@@ -24,7 +24,7 @@ The original paper-era implementation has been preserved on the `main_deprecated
 ## Supported calibration methods
 
 - `isotonic`
-- `smooth_isotonic`
+- `monotone_spline`
 - `linear`
 - `histogram`
 
@@ -54,10 +54,23 @@ Source examples:
 - R vignette: [getting-started.Rmd](./r/causalCalibration/vignettes/getting-started.Rmd)
 - Method notes: [docs/getting-started.qmd](./docs/getting-started.qmd), [docs/standard-calibration.qmd](./docs/standard-calibration.qmd), [docs/cross-calibration.qmd](./docs/cross-calibration.qmd), [docs/diagnostics.qmd](./docs/diagnostics.qmd), [docs/choosing-losses-and-methods.qmd](./docs/choosing-losses-and-methods.qmd), [docs/reference.qmd](./docs/reference.qmd)
 
+## v1.1 highlights
+
+- `method="isotonic"` now uses a LightGBM monotone one-tree backend with weights and `min_child_samples`.
+- `method="monotone_spline"` is the package’s smooth monotone calibration method.
+- `assess_overlap()` summarizes weak-overlap behavior and recommends `loss="r"` when original-population weighting looks unstable.
+- `diagnose_calibration(..., target_population = "dr" | "overlap" | "both")` lets `loss="r"` users report calibration for the overlap-weighted target population as well as the original-population DR target.
+- `validate_crossfit_bundle()` plus bundle helpers standardize pooled OOF predictions, fold matrices, fold IDs, nuisances, and weights before fitting.
+
 Python:
 
 ```python
-from causal_calibration import fit_calibrator, diagnose_calibration
+from causal_calibration import (
+    CalibrationBundle,
+    assess_overlap,
+    diagnose_calibration,
+    fit_calibrator,
+)
 
 calibrator = fit_calibrator(
     predictions=tau_hat,
@@ -71,6 +84,7 @@ calibrator = fit_calibrator(
 )
 
 tau_calibrated = calibrator.predict(tau_new)
+overlap = assess_overlap(treatment=a, propensity=e_hat)
 
 diagnostics = diagnose_calibration(
     predictions=tau_calibrated,
@@ -80,6 +94,7 @@ diagnostics = diagnose_calibration(
     mu0=mu0_hat,
     mu1=mu1_hat,
     propensity=e_hat,
+    target_population="both",
 )
 ```
 
@@ -100,6 +115,7 @@ calibrator <- fit_calibrator(
 )
 
 tau_calibrated <- predict(calibrator, tau_new)
+overlap <- assess_overlap(treatment = a, propensity = e_hat)
 ```
 
 ## Method references

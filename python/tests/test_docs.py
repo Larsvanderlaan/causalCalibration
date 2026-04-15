@@ -37,6 +37,7 @@ class DocsTests(unittest.TestCase):
         self.assertIn("fit_calibrator()", page)
         self.assertIn("fit_cross_calibrator()", page)
         self.assertIn("diagnose_calibration()", page)
+        self.assertIn("assess_overlap()", page)
         self.assertIn("Cross vs Standard", page)
         self.assertIn("losses and methods", page.lower())
 
@@ -51,6 +52,7 @@ class DocsTests(unittest.TestCase):
         self.assertIn("Nie and Wager", guide)
         self.assertIn("Kennedy", guide)
         self.assertIn("van der Laan et al. (2023)", guide)
+        self.assertIn("monotone_spline", guide)
 
     def test_cross_calibration_page_links_to_sources(self) -> None:
         with open(

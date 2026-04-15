@@ -32,6 +32,7 @@ This vignette shows the full package workflow:
 - construct raw and cross-fitted prediction objects,
 - fit ordinary calibration,
 - fit cross-calibration in sample,
+- inspect overlap before choosing the calibration target,
 - compare predictions,
 - and interpret diagnostics.
 
@@ -63,6 +64,8 @@ tau_new <- tau_raw + 0.03 * sin(6 * w)
 # Ordinary calibration
 
 ```{r}
+summary(assess_overlap(treatment = treatment, propensity = propensity))
+
 calibrator <- fit_calibrator(
   predictions = tau_raw,
   treatment = treatment,
@@ -85,11 +88,19 @@ Cross-calibration is the central in-sample workflow when your learner produced c
 
 - `predictions = tau_oof` are the pooled out-of-fold predictions used to fit the calibration map.
 - `fold_predictions = tau_fold_matrix` is the full `n x K` matrix used for prediction-time aggregation.
+- `fold_ids` identifies which column is the OOF prediction for each observation and lets the package validate the cross-fit bundle.
 
 ```{r}
+validate_crossfit_bundle(
+  predictions = tau_oof,
+  fold_predictions = tau_fold_matrix,
+  fold_ids = fold_ids
+)
+
 cross_calibrator <- fit_cross_calibrator(
   predictions = tau_oof,
   fold_predictions = tau_fold_matrix,
+  fold_ids = fold_ids,
   treatment = treatment,
   outcome = outcome,
   mu0 = mu0,
@@ -127,7 +138,8 @@ diagnostics <- diagnose_calibration(
   mu1 = mu1,
   propensity = propensity,
   curve_method = "histogram",
-  fold_ids = fold_ids
+  fold_ids = fold_ids,
+  target_population = "both"
 )
 
 summary(diagnostics)

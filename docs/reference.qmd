@@ -27,12 +27,18 @@ Use when you want cross-calibration for cross-fitted treatment-effect prediction
 
 - `predictions`: pooled out-of-fold predictions used to fit the calibration map
 - `fold_predictions`: `n x K` matrix used for calibrated aggregation at prediction time
+- `fold_ids`: optional out-of-fold column index per observation; when supplied, the package validates that pooled OOF predictions really match the designated fold-specific column.
 
 ### Common mistakes
 
 - swapping `predictions` and `fold_predictions`,
 - passing a single-column matrix when the intended workflow is cross-calibration,
 - forgetting that prediction later also expects a fold-specific matrix.
+
+### Validation helpers
+
+- `validate_crossfit_bundle(...)`: validate pooled OOF predictions, fold matrices, and optional fold IDs before fitting.
+- `crossfit_bundle(...)` / `crossfit_bundle_from_data_frame(...)`: package the cross-fit workflow objects in one place.
 
 ## `diagnose_calibration()`
 
@@ -44,10 +50,31 @@ Use when you want a calibration curve, a scalar error estimate, and uncertainty 
 - treatment and outcome,
 - nuisance estimates,
 - optional comparison vector.
+- optional `target_population = "dr" | "overlap" | "both"`.
 
 ### Interpretation
 
 The meaning of the result depends on the target population implied by your loss and nuisance structure. See [Losses and Methods](choosing-losses-and-methods.qmd).
+
+## `assess_overlap()`
+
+Use when you want a quick overlap summary before choosing `loss="dr"` versus `loss="r"`.
+
+### Outputs
+
+- propensity min/max,
+- tail fractions below `0.05`, `0.10`, above `0.90`, `0.95`,
+- clipped fraction,
+- IPW effective sample size,
+- overlap-weight effective sample size,
+- severity label and recommended loss.
+
+## Bundle helpers
+
+- `calibration_bundle(...)` / `calibration_bundle_from_data_frame(...)`
+- `crossfit_bundle(...)` / `crossfit_bundle_from_data_frame(...)`
+- `fit_bundle_calibrator(...)`
+- `fit_bundle_cross_calibrator(...)`
 
 # Object behavior
 
@@ -65,7 +92,7 @@ The meaning of the result depends on the target population implied by your loss 
 ## `CalibrationDiagnostics`
 
 - `summary()`: scalar results and intervals
-- `curve_frame()` / plotting helpers: calibration-curve outputs for visualization
+- plotting helpers: calibration-curve outputs for visualization
 
 # Reference examples
 

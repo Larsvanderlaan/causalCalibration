@@ -1,7 +1,7 @@
 Package: causalCalibration
 Type: Package
 Title: Causal Calibration for Heterogeneous Treatment Effects
-Version: 1.0.0
+Version: 1.1.0
 Authors@R: c(
     person(given = "Lars", family = "van der Laan", role = c("aut", "cre"), email = "lvdlaan@uw.edu")
   )
@@ -15,6 +15,8 @@ Encoding: UTF-8
 LazyData: false
 Depends:
     R (>= 4.1.0)
+Imports:
+    reticulate
 Suggests:
     knitr,
     rmarkdown,

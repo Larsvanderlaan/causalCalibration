@@ -17,6 +17,7 @@ calibrator <- fit_calibrator(
 )
 
 print(predict(calibrator, predictions))
+print(summary(assess_overlap(treatment = treatment, propensity = propensity)))
 
 diagnostics <- diagnose_calibration(
   predictions = predictions,
@@ -24,7 +25,8 @@ diagnostics <- diagnose_calibration(
   outcome = outcome,
   mu0 = mu0,
   mu1 = mu1,
-  propensity = propensity
+  propensity = propensity,
+  target_population = "both"
 )
 
 print(summary(diagnostics))

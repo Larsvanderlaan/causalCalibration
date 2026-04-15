@@ -26,6 +26,7 @@ Instead, it calibrates predictions from a learner you already have. The package 
 - observed treatment and outcome data,
 - nuisance estimates needed by the chosen loss,
 - and, for cross-calibration, a matrix of fold-specific predictions.
+- optionally, fold IDs that tell the package which column is the out-of-fold prediction for each observation.
 
 ## The package workflow
 
@@ -35,6 +36,7 @@ Instead, it calibrates predictions from a learner you already have. The package 
 4. Fit the calibrator.
 5. Predict calibrated effect scores.
 6. Diagnose remaining miscalibration.
+7. Revisit the loss if overlap diagnostics suggest the original-population target is unstable.
 
 # Which function should I use?
 
@@ -62,6 +64,7 @@ Instead, it calibrates predictions from a learner you already have. The package 
 |---|---|---|
 | `predictions` | One score per observation | `fit_calibrator`, `fit_cross_calibrator`, `diagnose_calibration` |
 | `fold_predictions` | `n x K` matrix of fold-specific predictions | `fit_cross_calibrator`, `predict(cross_calibrator, ...)` |
+| `fold_ids` | length `n` integer vector | `fit_cross_calibrator`, `validate_crossfit_bundle` |
 | `mu0`, `mu1`, `propensity` | DR-loss nuisance inputs | `loss="dr"` |
 | `outcome_mean`, `propensity` | R-loss nuisance inputs | `loss="r"` |
 
@@ -74,6 +77,15 @@ For most users, the best starting workflow is:
 - cross-calibration when cross-fitted predictions are available
 
 Then use diagnostics to check whether weak overlap suggests moving to `loss="r"` for a more overlap-focused target.
+
+# Workflow helpers
+
+If your upstream learner already produces vectors, fold matrices, and nuisance estimates, you can package them with:
+
+- `calibration_bundle(...)` or `calibration_bundle_from_data_frame(...)`
+- `crossfit_bundle(...)` or `crossfit_bundle_from_data_frame(...)`
+
+Those helpers are optional. They do not train learners for you; they just make the downstream calibration workflow more explicit and easier to validate.
 
 # Full examples
 

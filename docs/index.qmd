@@ -12,6 +12,7 @@ It is designed for applied researchers who:
 - want calibrated effect scores they can interpret more directly,
 - want to avoid spending a separate holdout split on calibration when cross-fitted predictions are available,
 - want diagnostics that quantify how much miscalibration remains.
+- want guidance about overlap, target population, and whether `loss="dr"` or `loss="r"` is the better fit.
 
 ## Main workflows
 
@@ -42,6 +43,7 @@ That lets you use all observations for the combined fit-and-calibrate workflow w
 - [Standard Calibration](standard-calibration.qmd): when to use ordinary calibration and how to fit it
 - [Cross-Calibration](cross-calibration.qmd): the central in-sample workflow for cross-fitted predictors
 - [Diagnostics](diagnostics.qmd): how to quantify remaining miscalibration and interpret the outputs
+- [Diagnostics](diagnostics.qmd): how to quantify remaining miscalibration, report original-population vs overlap-targeted error, and interpret the outputs
 - [Losses and Methods](choosing-losses-and-methods.qmd): how to choose `dr` vs `r` and which calibrator to use
 - [API Reference](reference.qmd): function-by-function contracts, argument requirements, and common mistakes
 

@@ -44,9 +44,17 @@ This interpretation follows the R-learner weighting structure of [Nie and Wager 
 
 Best default when you want a monotone nonparametric calibration map with minimal assumptions.
 
-## `smooth_isotonic`
+In `causalCalibration`, `isotonic` is implemented with a single monotone LightGBM regression tree. That gives you:
 
-Use when you want the monotone behavior of isotonic calibration with a smoother prediction surface.
+- monotone weighted fitting,
+- a practical `min_child_samples` control,
+- and flat extrapolation beyond the observed score range.
+
+## `monotone_spline`
+
+Use when you want a smooth monotone calibration map rather than a piecewise-constant one.
+
+This method uses a monotone spline fit with nonnegative derivative coefficients and a smoothness penalty. It is a good choice when you want a smoother calibrated prediction surface without leaving the monotone-function class.
 
 ## `linear`
 
@@ -74,4 +82,5 @@ Use when you want a coarse, transparent piecewise-constant map or a simple diagn
 If overlap is weak, diagnostics should be interpreted together with the loss choice:
 
 - a `dr` diagnostic targets the original population but may be noisier because of inverse-propensity behavior,
-- an `r` fit may be more stable in overlap-poor regions, but its calibrated scores answer a different target-population question.
+- an `r` fit may be more stable in overlap-poor regions, but its calibrated scores answer a different target-population question,
+- `assess_overlap()` gives a quick severity label plus a loss recommendation before you fit anything.

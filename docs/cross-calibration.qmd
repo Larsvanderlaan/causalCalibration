@@ -39,11 +39,18 @@ flowchart LR
 ## Python
 
 ```python
-from causal_calibration import fit_cross_calibrator
+from causal_calibration import fit_cross_calibrator, validate_crossfit_bundle
+
+validate_crossfit_bundle(
+    predictions=tau_oof,
+    fold_predictions=tau_fold_matrix,
+    fold_ids=fold_ids,
+)
 
 cross_calibrator = fit_cross_calibrator(
     predictions=tau_oof,
     fold_predictions=tau_fold_matrix,
+    fold_ids=fold_ids,
     treatment=a,
     outcome=y,
     mu0=mu0_hat,
@@ -59,9 +66,16 @@ tau_cross_calibrated = cross_calibrator.predict(tau_fold_matrix)
 ## R
 
 ```r
+validate_crossfit_bundle(
+  predictions = tau_oof,
+  fold_predictions = tau_fold_matrix,
+  fold_ids = fold_ids
+)
+
 cross_calibrator <- fit_cross_calibrator(
   predictions = tau_oof,
   fold_predictions = tau_fold_matrix,
+  fold_ids = fold_ids,
   treatment = a,
   outcome = y,
   mu0 = mu0_hat,
@@ -93,6 +107,7 @@ For a new sample, build the same kind of `m x K` matrix by applying each fold-sp
 - Passing a single prediction vector to `fit_cross_calibrator()` instead of pooled OOF predictions.
 - Passing only one calibrated prediction column instead of the full fold-specific matrix.
 - Forgetting that `fit_cross_calibrator()` fits on `predictions` but predicts from `fold_predictions`.
+- Skipping `fold_ids` when you actually want the package to verify pooled OOF alignment against the fold matrix.
 
 # Full walkthroughs
 

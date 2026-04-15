@@ -7,7 +7,13 @@ import math
 import os
 import unittest
 
-from causal_calibration import fit_calibrator, fit_cross_calibrator
+from causal_calibration import (
+    CrossFitBundle,
+    assess_overlap,
+    fit_calibrator,
+    fit_cross_calibrator,
+    validate_crossfit_bundle,
+)
 
 
 FIXTURE_DIR = os.path.abspath(
@@ -38,6 +44,7 @@ class CalibrationApiTests(unittest.TestCase):
         cross_calibrator = fit_cross_calibrator(
             predictions=[0.1, 0.2, 0.3],
             fold_predictions=[[0.0, 0.1, 0.3], [0.2, 0.3, 0.4], [0.3, 0.4, 0.6]],
+            fold_ids=[2, 1, 1],
             treatment=[0.0, 1.0, 0.0],
             outcome=[0.0, 1.0, 0.0],
             loss="dr",
@@ -48,6 +55,57 @@ class CalibrationApiTests(unittest.TestCase):
         )
         predictions = cross_calibrator.predict([[0.0, 0.2, 0.8]])
         self.assertEqual(len(predictions), 1)
+
+    def test_overlap_helper_recommends_r_under_weak_overlap(self) -> None:
+        overlap = assess_overlap(
+            treatment=[0.0, 1.0, 0.0, 1.0],
+            propensity=[0.01, 0.99, 0.04, 0.96],
+        )
+        self.assertEqual(overlap.recommended_loss, "r")
+        self.assertIn(overlap.severity, {"weak", "severe"})
+
+    def test_crossfit_validation_checks_oof_alignment(self) -> None:
+        summary = validate_crossfit_bundle(
+            predictions=[0.1, 0.5, 0.9],
+            fold_predictions=[[0.1, 0.0], [0.2, 0.5], [0.9, 0.8]],
+            fold_ids=[1, 2, 1],
+        )
+        self.assertEqual(summary["n_obs"], 3.0)
+        self.assertEqual(summary["has_fold_ids"], 1.0)
+
+    def test_crossfit_bundle_round_trips_into_fit(self) -> None:
+        bundle = CrossFitBundle.from_mapping(
+            {
+                "predictions": [0.1, 0.2, 0.3, 0.4],
+                "fold_predictions": [
+                    [0.1, 0.0],
+                    [0.0, 0.2],
+                    [0.3, 0.1],
+                    [0.2, 0.4],
+                ],
+                "fold_ids": [1, 2, 1, 2],
+                "treatment": [0.0, 1.0, 0.0, 1.0],
+                "outcome": [0.1, 0.8, 0.2, 1.0],
+                "mu0": [0.0, 0.2, 0.1, 0.3],
+                "mu1": [0.3, 0.9, 0.4, 1.1],
+                "propensity": [0.5, 0.5, 0.5, 0.5],
+            }
+        )
+        fitted = bundle.fit_cross_calibrator(loss="dr", method="histogram")
+        self.assertEqual(fitted.n_folds, 2)
+
+    def test_calibrator_plot_returns_axes(self) -> None:
+        calibrator = fit_calibrator(
+            predictions=[0.1, 0.2, 0.3, 0.4],
+            treatment=[0.0, 1.0, 0.0, 1.0],
+            outcome=[0.1, 0.8, 0.2, 1.0],
+            loss="dr",
+            method="linear",
+            mu0=[0.0, 0.2, 0.1, 0.3],
+            mu1=[0.3, 0.9, 0.4, 1.1],
+            propensity=[0.5, 0.5, 0.5, 0.5],
+        )
+        self.assertIsNotNone(calibrator.plot())
 
     def test_shared_fixture_expected_outputs_match(self) -> None:
         rows = read_fixture("core_fixture.csv")
@@ -63,7 +121,7 @@ class CalibrationApiTests(unittest.TestCase):
         }
         prediction_grid = [float(row["grid_prediction"]) for row in rows]
         for loss in ("dr", "r"):
-            for method in ("isotonic", "smooth_isotonic", "linear", "histogram"):
+            for method in ("isotonic", "monotone_spline", "linear", "histogram"):
                 calibrator = fit_calibrator(
                     predictions=dataset["predictions"],
                     treatment=dataset["treatment"],
@@ -90,6 +148,7 @@ class CalibrationApiTests(unittest.TestCase):
                         [float(row["fold_1"]), float(row["fold_2"]), float(row["fold_3"])]
                         for row in rows
                     ],
+                    fold_ids=[1, 2, 3, 1, 2, 3, 1, 2],
                     treatment=dataset["treatment"],
                     outcome=dataset["outcome"],
                     loss=loss,
