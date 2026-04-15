@@ -18,9 +18,7 @@ install.packages("r/causalCalibration", repos = NULL, type = "source")
 
 # Mental model
 
-This package does not train a treatment-effect learner for you.
-
-Instead, it calibrates predictions from a learner you already have. The package expects you to bring:
+The package calibrates predictions from a learner you already have. Bring:
 
 - a treatment-effect prediction vector,
 - observed treatment and outcome data,
@@ -28,7 +26,7 @@ Instead, it calibrates predictions from a learner you already have. The package 
 - and, for cross-calibration, a matrix of fold-specific predictions.
 - optionally, fold IDs that tell the package which column is the out-of-fold prediction for each observation.
 
-## The package workflow
+## Workflow
 
 1. Train or otherwise obtain a treatment-effect predictor.
 2. Compute the nuisance estimates required by the calibration loss.
@@ -70,7 +68,7 @@ Instead, it calibrates predictions from a learner you already have. The package 
 
 # First recommendation
 
-For most users, the best starting workflow is:
+For most users, start with:
 
 - `loss="dr"`
 - `method="isotonic"`
@@ -85,7 +83,7 @@ If your upstream learner already produces vectors, fold matrices, and nuisance e
 - `calibration_bundle(...)` or `calibration_bundle_from_data_frame(...)`
 - `crossfit_bundle(...)` or `crossfit_bundle_from_data_frame(...)`
 
-Those helpers are optional. They do not train learners for you; they just make the downstream calibration workflow more explicit and easier to validate.
+Those helpers are optional. They make the downstream workflow easier to validate.
 
 # Full examples
 

@@ -6,7 +6,7 @@ title: "causalCalibration"
 
 `causalCalibration` is a workflow-oriented package for calibrating heterogeneous treatment effect predictions after you have already trained a treatment-effect model.
 
-It is designed for applied researchers who:
+It is for applied researchers who:
 
 - already have treatment-effect predictions from some learner,
 - want calibrated effect scores they can interpret more directly,
@@ -19,8 +19,6 @@ It is designed for applied researchers who:
 ### Standard calibration
 
 Use `fit_calibrator()` when you have one prediction per observation and want a single calibration map.
-
-This is the simplest workflow when you have:
 
 - a vector of effect predictions,
 - treatment and outcome data,
@@ -35,14 +33,11 @@ Cross-calibration uses:
 - pooled out-of-fold predictions to fit the calibration map,
 - an `n x K` matrix of fold-specific predictions to produce calibrated predictions.
 
-That lets you use all observations for the combined fit-and-calibrate workflow while still keeping prediction-time aggregation out of fold.
-
 ## Documentation map
 
 - [Getting Started](getting-started.qmd): installation, mental model, and the package workflow at a glance
 - [Standard Calibration](standard-calibration.qmd): when to use ordinary calibration and how to fit it
 - [Cross-Calibration](cross-calibration.qmd): the central in-sample workflow for cross-fitted predictors
-- [Diagnostics](diagnostics.qmd): how to quantify remaining miscalibration and interpret the outputs
 - [Diagnostics](diagnostics.qmd): how to quantify remaining miscalibration, report original-population vs overlap-targeted error, and interpret the outputs
 - [Losses and Methods](choosing-losses-and-methods.qmd): how to choose `dr` vs `r` and which calibrator to use
 - [API Reference](reference.qmd): function-by-function contracts, argument requirements, and common mistakes

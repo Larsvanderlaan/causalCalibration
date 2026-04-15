@@ -90,13 +90,13 @@ tau_cross_calibrated <- predict(cross_calibrator, tau_fold_matrix)
 
 # How aggregation works
 
-Version 1 aggregates calibrated fold-specific predictions with the order-statistic median. This is more than a convenience detail: it is the actual prediction contract of the current cross-calibration API.
+Version 1 aggregates calibrated fold-specific predictions with the order-statistic median.
 
 # In-sample vs out-of-sample
 
 ## In-sample cross-calibrated predictions
 
-Use the same `n x K` fold-prediction matrix built for the training observations. This is the main “fit and calibrate in sample” workflow.
+Use the same `n x K` fold-prediction matrix built for the training observations.
 
 ## Out-of-sample predictions
 

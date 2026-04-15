@@ -6,7 +6,7 @@ title: "API Reference"
 
 ## `fit_calibrator()`
 
-Use when you have one prediction per unit and want a single calibration map.
+Use when you have one prediction per unit.
 
 ### Required by loss
 
@@ -21,7 +21,7 @@ Use when you have one prediction per unit and want a single calibration map.
 
 ## `fit_cross_calibrator()`
 
-Use when you want cross-calibration for cross-fitted treatment-effect predictions.
+Use for cross-fitted treatment-effect predictions.
 
 ### Contract
 
@@ -42,14 +42,14 @@ Use when you want cross-calibration for cross-fitted treatment-effect prediction
 
 ## `diagnose_calibration()`
 
-Use when you want a calibration curve, a scalar error estimate, and uncertainty quantification.
+Use for a calibration curve, a scalar error estimate, and uncertainty quantification.
 
 ### Inputs
 
 - prediction vector,
 - treatment and outcome,
 - nuisance estimates,
-- optional comparison vector.
+- optional comparison vector,
 - optional `target_population = "dr" | "overlap" | "both"`.
 
 ### Interpretation
@@ -58,7 +58,7 @@ The meaning of the result depends on the target population implied by your loss 
 
 ## `assess_overlap()`
 
-Use when you want a quick overlap summary before choosing `loss="dr"` versus `loss="r"`.
+Use for a quick overlap summary before choosing `loss="dr"` versus `loss="r"`.
 
 ### Outputs
 

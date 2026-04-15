@@ -127,14 +127,10 @@ tau_star &lt;- predict(cal, tau_new)</code></pre>
               <p class="eyebrow">Overview</p>
               <h2>What is this package for?</h2>
               <p>
-                This package starts after HTE estimation. You bring treatment-effect
-                predictions and the nuisance estimates required by the chosen loss. The
-                package fits a calibration map, returns calibrated scores, and estimates
-                remaining calibration error.
-              </p>
-              <p class="section-side-note">
-                The package is intentionally framework-agnostic: it calibrates outputs from
-                an HTE pipeline rather than training the pipeline itself.
+                The package starts after HTE estimation. You bring treatment-effect
+                predictions and the nuisance estimates required by the chosen loss. It fits
+                a calibration map, returns calibrated scores, and estimates remaining
+                calibration error.
               </p>
             </div>
           </div>
@@ -144,10 +140,8 @@ tau_star &lt;- predict(cal, tau_new)</code></pre>
               <p class="panel-label">Main workflow</p>
               <h3>Calibrate an existing treatment-effect model</h3>
               <p>
-                This package wraps around the learner you already use. It works with
-                DR-learners, R-learners, T-learners, forests, boosting, and other black-box
-                HTE pipelines because calibration only needs the prediction score and
-                nuisance inputs.
+                The package wraps around the learner you already use. It only needs the
+                prediction score and nuisance inputs.
               </p>
               <pre class="inline-code"><code>fit_calibrator(...)
 fit_cross_calibrator(...)
@@ -172,8 +166,7 @@ diagnose_calibration(...)</code></pre>
               <h3>Choose the loss before you choose the method</h3>
               <p>
                 <code>loss="dr"</code> calibrates to the original study population, while
-                <code>loss="r"</code> calibrates to an overlap-weighted population. The site
-                and package docs keep that distinction explicit throughout.
+                <code>loss="r"</code> calibrates to an overlap-weighted population.
               </p>
             </article>
             <article class="argument-card">
@@ -181,17 +174,15 @@ diagnose_calibration(...)</code></pre>
               <h3>Built for binary-treatment CATE workflows</h3>
               <p>
                 The package currently targets binary treatment, observed outcomes, and
-                externally estimated nuisance functions. That scope is deliberate, and it is
-                the right way to read the guarantees and examples on this site.
+                externally estimated nuisance functions.
               </p>
             </article>
             <article class="argument-card">
               <p class="mini-label">Diagnostics</p>
-              <h3>Use diagnostics as part of the workflow, not as an afterthought</h3>
+              <h3>Report calibrated models with uncertainty</h3>
               <p>
-                Calibration fitting and calibration diagnostics are companion tools. The
-                package is designed so users can fit, compare, and report calibrated models
-                with uncertainty rather than only applying a post-hoc map.
+                Fit, compare, and report calibrated models with uncertainty rather than only
+                applying a post-hoc map.
               </p>
             </article>
           </div>
@@ -207,7 +198,7 @@ diagnose_calibration(...)</code></pre>
           <div class="section-heading">
             <div>
               <p class="eyebrow">Documentation</p>
-              <h2>Where should a new user start?</h2>
+              <h2>Documentation</h2>
               <p>
                 The documentation is organized around the actual applied workflow: choose a
                 target population, decide between standard calibration and cross-calibration,
@@ -221,8 +212,7 @@ diagnose_calibration(...)</code></pre>
               <p class="mini-label">Start here</p>
               <h3>Getting started</h3>
               <p>
-                Scope, required inputs, workflow objects, and the default path for new
-                users.
+                Scope, required inputs, workflow objects, and the default starting path.
               </p>
               <div class="doc-links">
                 <a class="doc-link" href="./_site/getting-started.html">Open guide</a>
@@ -254,8 +244,7 @@ diagnose_calibration(...)</code></pre>
               <p class="mini-label">Reporting</p>
               <h3>Diagnostics and reference</h3>
               <p>
-                Calibration-error estimation, target-population summaries, and public API
-                contracts in one place.
+                Calibration-error estimation, target-population summaries, and API contracts.
               </p>
               <div class="doc-links">
                 <a class="doc-link" href="./_site/diagnostics.html">Diagnostics</a>
@@ -271,9 +260,7 @@ diagnose_calibration(...)</code></pre>
               <p class="eyebrow">Installation</p>
               <h2>How do I install it?</h2>
               <p>
-                The repository provides native Python and R interfaces. The simplest local
-                installs are below, along with GitHub-based installs when you want to pull
-                directly from the repo.
+                Local and GitHub-based installs are below.
               </p>
             </div>
           </div>
@@ -356,8 +343,7 @@ diagnose_calibration(...)</code></pre>
               </div>
               <p>
                 <code>method="isotonic"</code> fits a monotone LightGBM one-tree map with
-                observation weights and a minimum leaf-size control. It is still the main
-                paper-native starting point, but now with a production-friendly backend.
+                observation weights and a minimum leaf-size control.
               </p>
             </article>
 
@@ -425,7 +411,7 @@ diagnose_calibration(...)</code></pre>
             <article class="argument-card">
               <h3>How prediction works afterward</h3>
               <p>
-                The current implementation fits one calibration map on pooled OOF predictions,
+                The implementation fits one calibration map on pooled OOF predictions,
                 applies that map to each fold-specific column, and aggregates row-wise by the
                 median.
               </p>
@@ -471,8 +457,8 @@ diagnose_calibration(...)</code></pre>
             <article class="argument-card">
               <h3><code>method="isotonic"</code></h3>
               <p>
-                A piecewise-constant monotone calibration map. This is the main paper-native
-                choice and the default method most users should start with.
+                A piecewise-constant monotone calibration map and the default starting
+                method.
               </p>
             </article>
             <article class="argument-card">
@@ -579,13 +565,13 @@ diag &lt;- diagnose_calibration(
           </div>
 
           <div class="callout">
-            <strong>Diagnostics are part of the package contract</strong>
+            <strong>Diagnostics</strong>
             <p>
               <code>diagnose_calibration()</code> estimates calibration error with balanced
               jackknife uncertainty and can report original-population and
               overlap-weighted targets in the same object. Use
               <code>assess_overlap()</code> before fitting when you want a quick overlap
-              severity check and a loss recommendation.
+              check and a loss recommendation.
             </p>
           </div>
         </section>

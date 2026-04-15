@@ -21,7 +21,7 @@ Diagnostics take:
 - nuisance estimates,
 - and optionally a second prediction vector for before/after comparisons.
 
-Diagnostics do not take learner objects. They work on the outputs of a learner, not the learner itself.
+Diagnostics do not take learner objects.
 
 # Included outputs
 
@@ -51,17 +51,17 @@ Diagnostics can answer two different questions:
 - `target_population="overlap"`: calibration in the overlap-weighted population aligned with the R-loss target.
 - `target_population="both"`: return both summaries in one object.
 
-This is especially important for `loss="r"` workflows. The fitted calibrator targets the overlap-weighted population, so the overlap-targeted diagnostic is the natural companion summary. The DR diagnostic is still useful when you want to ask how the same predictor behaves for the original population.
+For `loss="r"` workflows, the overlap-targeted diagnostic is the natural companion summary. The DR diagnostic is useful when you want the same predictor evaluated for the original population.
 
 # Reading the output
 
 ## Small calibration error
 
-This suggests the prediction rule is close to self-calibrated under the chosen target population and nuisance estimates.
+This suggests the prediction rule is close to calibrated under the chosen target population and nuisance estimates.
 
 ## Large calibration error
 
-This suggests the prediction scale is still not directly interpretable as an average treatment effect for units sharing the same calibrated score.
+This suggests the prediction scale is still not directly interpretable as an average treatment effect for units sharing the same score.
 
 ## Before/after comparisons
 
@@ -97,4 +97,4 @@ diagnostics <- diagnose_calibration(
 
 # Important caveat
 
-Diagnostics are only as good as the nuisance inputs and prediction vectors they receive. In practice, you should prefer cross-fitted nuisance estimates whenever possible.
+Prefer cross-fitted nuisance estimates whenever possible.

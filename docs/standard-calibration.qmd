@@ -5,8 +5,7 @@ title: "Standard Calibration"
 # When standard calibration is the right tool
 
 Use standard calibration when you want a single calibration map from one prediction per observation.
-
-This is the simplest route when:
+Use it when:
 
 - you already have a dedicated calibration split,
 - you are calibrating predictions on a held-out sample,
@@ -46,9 +45,9 @@ calibrator <- fit_calibrator(
 tau_calibrated <- predict(calibrator, tau_hat_new)
 ```
 
-# What this does
+# What it does
 
-The calibrator learns a mapping from raw treatment-effect scores to calibrated scores. After fitting, any future prediction can be passed through that map with `predict()`.
+The calibrator learns a mapping from raw treatment-effect scores to calibrated scores.
 
 # What standard calibration does not do
 

@@ -4,15 +4,11 @@ title: "Choosing Losses and Methods"
 
 # What population is being calibrated?
 
-This is the most important conceptual choice in the package.
-
 ## `loss="dr"`
 
-`loss="dr"` calibrates to the original study population. This is the most natural target when you want calibrated scores to reflect the effect scale for the actual observed population.
+`loss="dr"` calibrates to the original study population.
 
 However, the DR-loss relies on inverse-propensity weighting. That makes it more sensitive when overlap is weak or propensities get close to `0` or `1`.
-
-In practice:
 
 - target: original / observed population
 - strength: direct population-level interpretation
@@ -24,9 +20,7 @@ This aligns with the doubly robust treatment-effect construction used in the cau
 
 `loss="r"` calibrates using the R-loss weighting induced by `(A - e(W))^2`. That means the calibration problem places more emphasis on observations in the overlap or equipoise region.
 
-This usually makes the calibration workflow more robust when overlap is weak, but it changes the calibration target: calibrated scores should be interpreted as calibrated for an overlap-weighted population rather than the original study population.
-
-In practice:
+This is often more robust when overlap is weak, but it changes the target: the calibrated scores apply to an overlap-weighted population rather than the original study population.
 
 - target: overlap-weighted population
 - strength: often more robust under weak overlap
@@ -52,9 +46,9 @@ In `causalCalibration`, `isotonic` is implemented with a single monotone LightGB
 
 ## `monotone_spline`
 
-Use when you want a smooth monotone calibration map rather than a piecewise-constant one.
+Use when you want a smooth monotone map rather than a piecewise-constant one.
 
-This method uses a monotone spline fit with nonnegative derivative coefficients and a smoothness penalty. It is a good choice when you want a smoother calibrated prediction surface without leaving the monotone-function class.
+This method uses a monotone spline fit with nonnegative derivative coefficients and a smoothness penalty.
 
 ## `linear`
 
