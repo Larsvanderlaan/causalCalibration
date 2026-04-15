@@ -75,6 +75,7 @@ For most users, start with:
 - cross-calibration when cross-fitted predictions are available
 
 Then use diagnostics to check whether weak overlap suggests moving to `loss="r"` for a more overlap-focused target.
+`assess_overlap()` is the package's default screen for that decision; its thresholds are practical defaults, not universal rules.
 
 # Workflow helpers
 

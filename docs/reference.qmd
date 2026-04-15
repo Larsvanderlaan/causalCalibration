@@ -58,16 +58,18 @@ The meaning of the result depends on the target population implied by your loss 
 
 ## `assess_overlap()`
 
-Use for a quick overlap summary before choosing `loss="dr"` versus `loss="r"`.
+Use for the package's default overlap screen before choosing `loss="dr"` versus `loss="r"`.
 
 ### Outputs
 
 - propensity min/max,
-- tail fractions below `0.05`, `0.10`, above `0.90`, `0.95`,
+- tail fractions below `0.05`, `0.10`, above `0.90`, `0.95` used by the default screen,
 - clipped fraction,
 - IPW effective sample size,
 - overlap-weight effective sample size,
-- severity label and recommended loss.
+- severity label and recommended loss under the package defaults.
+
+Treat those cutoffs as workflow heuristics built into the package, not as universal overlap thresholds.
 
 ## Bundle helpers
 

@@ -1,6 +1,6 @@
 #' Assess treatment overlap from propensity scores
 #'
-#' Summarizes weak-overlap behavior and recommends a calibration loss.
+#' Applies the package's default overlap screen and recommends a calibration loss.
 #'
 #' @param treatment Numeric binary vector of treatment assignments.
 #' @param propensity Numeric vector of propensity scores.
@@ -65,7 +65,7 @@ assess_overlap <- function(
   if (is.null(overlap) || overlap$severity == "adequate") {
     return(character())
   }
-  messages <- "Weak overlap detected from propensity behavior; consider `loss = \"r\"` for overlap-weighted calibration."
+  messages <- "The package's default overlap screen flagged weak overlap; consider `loss = \"r\"` for overlap-weighted calibration."
   if (overlap$clipped_fraction > 0.02) {
     messages <- c(
       messages,

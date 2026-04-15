@@ -56,7 +56,7 @@ class OverlapDiagnostics:
         if self.severity == "adequate":
             return messages
         messages.append(
-            "Weak overlap detected from propensity behavior; consider `loss=\"r\"` for overlap-weighted calibration."
+            "The package's default overlap screen flagged weak overlap; consider `loss=\"r\"` for overlap-weighted calibration."
         )
         if self.clipped_fraction > 0.02:
             messages.append(

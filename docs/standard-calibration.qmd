@@ -59,7 +59,7 @@ Standard calibration does not reconstruct fold-specific prediction behavior. If 
 3. Compare raw and calibrated predictions on the same observations.
 4. Run `diagnose_calibration()` to quantify how much miscalibration remains.
 5. Run `assess_overlap()` or inspect the attached overlap summary if overlap might be weak.
-6. Revisit the loss choice if overlap looks weak.
+6. Revisit the loss choice if the package's default overlap screen suggests that `loss="dr"` may be unstable.
 
 # See also
 

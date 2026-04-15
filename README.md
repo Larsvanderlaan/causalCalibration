@@ -58,7 +58,7 @@ Source examples:
 
 - `method="isotonic"` now uses a LightGBM monotone one-tree backend with weights and `min_child_samples`.
 - `method="monotone_spline"` is the package’s smooth monotone calibration method.
-- `assess_overlap()` summarizes weak-overlap behavior and recommends `loss="r"` when original-population weighting looks unstable.
+- `assess_overlap()` applies the package's default overlap screen, reports the tail and effective-sample-size summaries it uses, and gives a default `loss="dr"` versus `loss="r"` recommendation.
 - `diagnose_calibration(..., target_population = "dr" | "overlap" | "both")` lets `loss="r"` users report calibration for the overlap-weighted target population as well as the original-population DR target.
 - `validate_crossfit_bundle()` plus bundle helpers standardize pooled OOF predictions, fold matrices, fold IDs, nuisances, and weights before fitting.
 

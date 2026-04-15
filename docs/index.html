@@ -155,7 +155,7 @@ diagnose_calibration(...)</code></pre>
                 <code>CalibrationBundle</code> and <code>CrossFitBundle</code> package the
                 inputs from an external pipeline, <code>validate_crossfit_bundle()</code>
                 checks fold consistency, and <code>assess_overlap()</code> gives a quick
-                overlap severity summary before fitting.
+                package-default overlap screen before fitting.
               </p>
             </article>
           </div>
@@ -571,7 +571,8 @@ diag &lt;- diagnose_calibration(
               jackknife uncertainty and can report original-population and
               overlap-weighted targets in the same object. Use
               <code>assess_overlap()</code> before fitting when you want a quick overlap
-              check and a loss recommendation.
+              check, the default tail and ESS summaries, and the package's default loss
+              recommendation.
             </p>
           </div>
         </section>

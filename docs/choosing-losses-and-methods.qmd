@@ -30,7 +30,7 @@ This interpretation follows the R-learner weighting structure of [Nie and Wager 
 
 ## Short recommendation
 
-> Choose `r` when overlap is weak and overlap-population targeting is acceptable. Choose `dr` when you want calibration in the original population and overlap is adequate.
+> Default package recommendation: start with `dr` when original-population targeting is the goal and overlap looks adequate. Move to `r` when the package's overlap screen flags weak overlap and an overlap-weighted target is acceptable.
 
 # Choosing a calibration method
 
@@ -77,4 +77,6 @@ If overlap is weak, diagnostics should be interpreted together with the loss cho
 
 - a `dr` diagnostic targets the original population but may be noisier because of inverse-propensity behavior,
 - an `r` fit may be more stable in overlap-poor regions, but its calibrated scores answer a different target-population question,
-- `assess_overlap()` gives a quick severity label plus a loss recommendation before you fit anything.
+- `assess_overlap()` gives a quick severity label plus a default loss recommendation before you fit anything.
+
+The `assess_overlap()` severity labels use package-default screening rules based on propensity tails, clipping, and IPW effective sample size. Treat them as workflow defaults rather than universal cutoffs.
