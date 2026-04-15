@@ -576,6 +576,7 @@ li {
 }
 
 .guide-line {
+  fill: none;
   stroke: rgba(22, 50, 61, 0.2);
   stroke-width: 1.5;
   stroke-dasharray: 6 5;
