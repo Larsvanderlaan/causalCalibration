@@ -35,12 +35,12 @@ Cross-calibration uses:
 
 ## Documentation map
 
-- [Getting Started](getting-started.qmd): installation, mental model, and the package workflow at a glance
-- [Standard Calibration](standard-calibration.qmd): when to use ordinary calibration and how to fit it
-- [Cross-Calibration](cross-calibration.qmd): the central in-sample workflow for cross-fitted predictors
-- [Diagnostics](diagnostics.qmd): how to quantify remaining miscalibration, report original-population vs overlap-targeted error, and read the BLP slope diagnostic for effect heterogeneity
-- [Losses and Methods](choosing-losses-and-methods.qmd): how to choose `dr` vs `r` and which calibrator to use
-- [API Reference](reference.qmd): function-by-function contracts, argument requirements, and common mistakes
+- [Getting Started](getting-started.html): installation, mental model, and the package workflow at a glance
+- [Standard Calibration](standard-calibration.html): when to use ordinary calibration and how to fit it
+- [Cross-Calibration](cross-calibration.html): the central in-sample workflow for cross-fitted predictors
+- [Diagnostics](diagnostics.html): how to quantify remaining miscalibration, report original-population vs overlap-targeted error, and read the BLP slope diagnostic for effect heterogeneity
+- [Losses and Methods](choosing-losses-and-methods.html): how to choose `dr` vs `r` and which calibrator to use
+- [API Reference](reference.html): function-by-function contracts, argument requirements, and common mistakes
 
 ## Source workflows
 
