@@ -44,8 +44,8 @@ Cross-calibration uses:
 
 ## Source workflows
 
-- Python notebook: [examples/python-workflow.ipynb](../examples/python-workflow.ipynb)
-- R vignette: [r/causalCalibration/vignettes/getting-started.Rmd](../r/causalCalibration/vignettes/getting-started.Rmd)
+- Python notebook: [examples/python-workflow.ipynb](https://github.com/Larsvanderlaan/causalCalibration/blob/main/examples/python-workflow.ipynb)
+- R vignette: [r/causalCalibration/vignettes/getting-started.Rmd](https://github.com/Larsvanderlaan/causalCalibration/blob/main/r/causalCalibration/vignettes/getting-started.Rmd)
 
 ## Method references
 
