@@ -31,7 +31,7 @@
             <a href="#references">References</a>
             <a href="https://github.com/Larsvanderlaan/causalCalibration">GitHub</a>
           </div>
-          <a class="paper-link" href="https://arxiv.org/abs/2302.14011">
+          <a class="paper-link" href="https://proceedings.mlr.press/v202/van-der-laan23a/van-der-laan23a.pdf">
             <span class="paper-link-icon" aria-hidden="true"></span>
             <span>Paper</span>
           </a>
@@ -52,11 +52,10 @@
               </div>
             </div>
             <p class="lede">
-              <a href="https://arxiv.org/abs/2302.14011"><code>causalCalibration</code></a>
-              calibrates treatment-effect scores after you have already trained an HTE model.
-              It implements the workflow from the causal isotonic calibration paper together
-              with pooled cross-calibration, practical alternative calibration maps, and
-              doubly robust diagnostics in Python and R.
+              <a href="https://proceedings.mlr.press/v202/van-der-laan23a/van-der-laan23a.pdf"><code>causalCalibration</code></a>
+              calibrates treatment-effect scores after HTE estimation. It implements causal
+              isotonic calibration, pooled cross-calibration, smooth monotone spline
+              calibration, and doubly robust diagnostics in Python and R.
             </p>
             <div class="hero-actions">
               <a class="button button-primary" href="#quickstart">Get started</a>
@@ -66,7 +65,7 @@
             <ul class="hero-pills">
               <li>Standard calibration and pooled cross-calibration</li>
               <li><code>dr</code> and <code>r</code> loss targets</li>
-              <li>Isotonic, smooth isotonic, linear, and histogram maps</li>
+              <li>Isotonic, monotone spline, linear, and histogram maps</li>
             </ul>
           </section>
 
@@ -80,7 +79,7 @@
                 </div>
                 <div class="hero-stat">
                   <strong>Core use case</strong>
-                  <span>Take a raw CATE score from any learner and put it onto an interpretable effect scale.</span>
+                  <span>Take a raw CATE score from any learner and map it onto a calibrated effect scale.</span>
                 </div>
                 <div class="hero-stat">
                   <strong>Cross-calibration</strong>
@@ -121,10 +120,10 @@ tau_star &lt;- predict(cal, tau_new)</code></pre>
               <p class="eyebrow">Overview</p>
               <h2>What is this package for?</h2>
               <p>
-                The package is for the part of the workflow that comes after HTE estimation.
-                You bring raw treatment-effect predictions plus the nuisance estimates needed by
-                your chosen loss. The package then fits a post-hoc calibration map, produces
-                calibrated scores, and can estimate remaining calibration error.
+                This package starts after HTE estimation. You bring treatment-effect
+                predictions and the nuisance estimates required by the chosen loss. The
+                package fits a calibration map, returns calibrated scores, and estimates
+                remaining calibration error.
               </p>
             </div>
           </div>
@@ -134,9 +133,10 @@ tau_star &lt;- predict(cal, tau_new)</code></pre>
               <p class="panel-label">Main workflow</p>
               <h3>Calibrate an existing treatment-effect model</h3>
               <p>
-                This package does not compete with your upstream learner. It wraps around
-                it. That makes it easy to add calibration to DR-learners, R-learners,
-                T-learners, forests, boosting, or any other black-box HTE pipeline.
+                This package wraps around the learner you already use. It works with
+                DR-learners, R-learners, T-learners, forests, boosting, and other black-box
+                HTE pipelines because calibration only needs the prediction score and
+                nuisance inputs.
               </p>
               <pre class="inline-code"><code>fit_calibrator(...)
 fit_cross_calibrator(...)
@@ -144,12 +144,13 @@ diagnose_calibration(...)</code></pre>
             </article>
 
             <article class="comparison-card">
-              <p class="panel-label">Why it matters</p>
-              <h3>A good ranking can still have the wrong effect scale</h3>
+              <p class="panel-label">Workflow helpers</p>
+              <h3>Validate cross-fits and overlap before you commit</h3>
               <p>
-                The paper’s motivation is simple: treatment-effect scores may still be useful
-                for ranking or subgrouping even when they overstate or understate the true
-                effect in the tails. Calibration is the step that corrects that scale.
+                <code>CalibrationBundle</code> and <code>CrossFitBundle</code> package the
+                inputs from an external pipeline, <code>validate_crossfit_bundle()</code>
+                checks fold consistency, and <code>assess_overlap()</code> gives a quick
+                overlap severity summary before fitting.
               </p>
             </article>
           </div>
@@ -157,7 +158,7 @@ diagnose_calibration(...)</code></pre>
           <div class="chip-row" style="margin-top: 18px;">
             <a class="chip-link" href="https://github.com/Larsvanderlaan/causalCalibration/blob/main/examples/python-workflow.ipynb">Python notebook</a>
             <a class="chip-link" href="https://github.com/Larsvanderlaan/causalCalibration/blob/main/r/causalCalibration/vignettes/getting-started.Rmd">R vignette</a>
-            <a class="chip-link" href="https://proceedings.mlr.press/v202/van-der-laan23a.html">ICML 2023 paper</a>
+            <a class="chip-link" href="https://proceedings.mlr.press/v202/van-der-laan23a/van-der-laan23a.pdf">Paper PDF</a>
           </div>
         </section>
 
@@ -202,9 +203,9 @@ diagnose_calibration(...)</code></pre>
               <p class="eyebrow">Calibration</p>
               <h2>Why calibration matters for CATE models</h2>
               <p>
-                A raw treatment-effect score can be directionally helpful without being
-                numerically trustworthy. Calibration turns the score into something closer to
-                “units with this prediction really have this average treatment effect.”
+                A treatment-effect score can rank units well and still miss the effect scale.
+                Calibration fixes that scale: units with the same calibrated score should have
+                an average treatment effect close to that score.
               </p>
             </div>
           </div>
@@ -220,7 +221,7 @@ diagnose_calibration(...)</code></pre>
               <article class="workflow-step workflow-step-accent">
                 <p class="workflow-step-label">Step 2</p>
                 <h3>Fit a map</h3>
-                <p>Learn a monotone or simple recalibration map from raw scores to calibrated scores.</p>
+                <p>Fit a monotone or parametric map from the raw score to a calibrated score.</p>
               </article>
               <div class="workflow-connector" aria-hidden="true"></div>
               <article class="workflow-step workflow-step-warm">
@@ -233,55 +234,54 @@ diagnose_calibration(...)</code></pre>
 
           <div class="calibration-grid">
             <article class="calibration-card">
-              <p class="panel-label">Scale Correction</p>
-              <h3>Calibration fixes magnitude, not just ordering</h3>
+              <p class="panel-label">Isotonic Calibration</p>
+              <h3>Piecewise-constant monotone calibration</h3>
               <div class="schematic-card">
-                <svg class="schematic-svg" viewBox="0 0 260 180" role="img" aria-label="Calibration schematic showing raw predictions and a calibrated monotone map.">
+                <svg class="schematic-svg" viewBox="0 0 260 180" role="img" aria-label="Poorly calibrated CATE curve together with a piecewise-constant isotonic calibration map.">
                   <line x1="36" y1="22" x2="36" y2="146" class="axis-line" />
                   <line x1="36" y1="146" x2="232" y2="146" class="axis-line" />
                   <line x1="52" y1="130" x2="216" y2="34" class="guide-line" />
-                  <path d="M52 118 C84 110, 112 90, 142 90 C168 90, 194 72, 216 44" class="raw-line" />
-                  <path d="M52 128 L100 128 L100 98 L154 98 L154 70 L216 36" class="cal-line" />
+                  <path d="M52 130 C72 126, 88 118, 100 104 C114 88, 126 74, 140 72 C156 70, 170 76, 184 66 C198 56, 206 44, 216 38" class="raw-line" />
+                  <path d="M52 132 L74 132 L74 126 L96 126 L96 116 L118 116 L118 98 L144 98 L144 82 L170 82 L170 70 L194 70 L194 54 L216 54" class="cal-line" />
                   <text x="134" y="167" class="axis-label" text-anchor="middle">Raw score</text>
                   <text x="16" y="88" class="axis-label" text-anchor="middle" transform="rotate(-90 16 88)">Average treatment effect</text>
-                  <text x="180" y="102" class="legend-label">Raw</text>
-                  <text x="186" y="58" class="legend-label">Calibrated</text>
+                  <text x="175" y="94" class="legend-label">Poorly calibrated CATE</text>
+                  <text x="182" y="50" class="legend-label">Isotonic fit</text>
                 </svg>
               </div>
               <p>
-                If a learner overstates high predicted effects or compresses the middle,
-                calibration can restore a more honest effect scale while preserving the basic
-                ranking structure for monotone methods.
+                <code>method="isotonic"</code> fits a piecewise-constant monotone map. It is
+                the most direct implementation of the paper’s calibration idea and the default
+                starting point for many workflows.
               </p>
             </article>
 
             <article class="calibration-card">
-              <p class="panel-label">Decision Support</p>
-              <h3>Clearer scores support clearer treatment decisions</h3>
+              <p class="panel-label">Monotone Spline</p>
+              <h3>Smooth monotone calibration</h3>
               <div class="schematic-card">
-                <svg class="schematic-svg" viewBox="0 0 260 180" role="img" aria-label="Decision schematic showing thresholding on calibrated treatment effect scores.">
+                <svg class="schematic-svg" viewBox="0 0 260 180" role="img" aria-label="Poorly calibrated CATE curve together with a smooth monotone spline calibration fit.">
                   <line x1="36" y1="22" x2="36" y2="146" class="axis-line" />
                   <line x1="36" y1="146" x2="232" y2="146" class="axis-line" />
-                  <line x1="36" y1="92" x2="232" y2="92" class="guide-line" />
-                  <path d="M50 128 L104 128 L104 92 L162 92 L162 54 L218 54" class="cal-line" />
-                  <path d="M162 22 L162 146" class="guide-line" />
-                  <text x="134" y="167" class="axis-label" text-anchor="middle">Calibrated score</text>
-                  <text x="16" y="88" class="axis-label" text-anchor="middle" transform="rotate(-90 16 88)">Action value</text>
-                  <text x="178" y="84" class="legend-label">Decision threshold</text>
+                  <line x1="52" y1="130" x2="216" y2="34" class="guide-line" />
+                  <path d="M52 130 C72 126, 88 118, 100 104 C114 88, 126 74, 140 72 C156 70, 170 76, 184 66 C198 56, 206 44, 216 38" class="raw-line" />
+                  <path d="M52 132 C70 130, 86 124, 102 112 C118 98, 132 88, 146 80 C160 72, 176 66, 192 56 C202 50, 210 44, 216 38" class="cal-line" />
+                  <text x="134" y="167" class="axis-label" text-anchor="middle">Raw score</text>
+                  <text x="16" y="88" class="axis-label" text-anchor="middle" transform="rotate(-90 16 88)">Average treatment effect</text>
+                  <text x="166" y="92" class="legend-label">Poorly calibrated CATE</text>
+                  <text x="184" y="58" class="legend-label">Monotone spline fit</text>
                 </svg>
               </div>
               <p>
-                When a score is used to target treatment, sign and magnitude both matter.
-                Calibration makes thresholding more transparent because the score is closer to
-                the average effect among units receiving that score.
+                <code>method="monotone_spline"</code> estimates a smooth monotone
+                transformation with a constrained spline fit. Use it when you want monotone
+                calibration without a piecewise-constant map.
               </p>
             </article>
           </div>
 
           <p class="calibration-summary">
-            In the paper’s language, calibration is the property that units with the same
-            prediction have an average treatment effect close to that prediction. That is the
-            conceptual center of this package.
+            A calibrated score is not just ordered correctly; it is on the right effect scale.
           </p>
         </section>
 
@@ -291,9 +291,8 @@ diagnose_calibration(...)</code></pre>
               <p class="eyebrow">Workflows</p>
               <h2>Should I use standard calibration or cross-calibration?</h2>
               <p>
-                This is the first major workflow choice. The answer depends on whether your
-                upstream HTE learner already used cross-fitting and whether you saved the
-                fold-specific prediction objects.
+                This choice depends on whether the upstream learner used cross-fitting and
+                whether you saved fold-specific predictions.
               </p>
             </div>
           </div>
@@ -312,10 +311,10 @@ diagnose_calibration(...)</code></pre>
               <h3>Use cross-calibration</h3>
               <p>
                 Choose <code>fit_cross_calibrator()</code> when the learner was trained with
-                cross-fitting and you want to calibrate in sample without carving off a second
-                holdout set.
+                cross-fitting and you want to calibrate in sample without a second holdout
+                set.
               </p>
-              <p><strong>Inputs:</strong> pooled OOF <code>predictions</code> plus an <code>n x K</code> matrix of fold-specific predictions.</p>
+              <p><strong>Inputs:</strong> pooled OOF <code>predictions</code>, an <code>n x K</code> matrix of fold-specific predictions, and optional <code>fold_ids</code>.</p>
             </article>
             <article class="argument-card">
               <h3>How prediction works afterward</h3>
@@ -340,9 +339,8 @@ diagnose_calibration(...)</code></pre>
               <p class="eyebrow">Losses and Methods</p>
               <h2>What do we implement?</h2>
               <p>
-                There are two conceptual loss choices and four calibration backends. The loss
-                decides which population you are calibrating for; the method decides the shape
-                of the calibration map.
+                The loss chooses the target population. The method chooses the calibration
+                map.
               </p>
             </div>
           </div>
@@ -351,31 +349,29 @@ diagnose_calibration(...)</code></pre>
             <article class="argument-card">
               <h3><code>loss="dr"</code></h3>
               <p>
-                Doubly robust calibration for the original study population. This is the
-                natural default when you want calibrated scores to speak to the observed
-                population directly.
+                Doubly robust calibration for the original study population. Use it when the
+                calibrated score should target the observed population directly.
               </p>
             </article>
             <article class="argument-card">
               <h3><code>loss="r"</code></h3>
               <p>
-                R-loss calibration for an overlap-weighted population. This is often more
-                stable under weak overlap, but it answers a different target-population
-                question.
+                R-loss calibration for an overlap-weighted population. It is often more stable
+                under weak overlap, but it targets a different population.
               </p>
             </article>
             <article class="argument-card">
               <h3><code>method="isotonic"</code></h3>
               <p>
-                The paper-native choice: monotone, nonparametric, and the main method most
-                users should start with.
+                A piecewise-constant monotone calibration map. This is the main paper-native
+                choice and the default method most users should start with.
               </p>
             </article>
             <article class="argument-card">
-              <h3><code>method="smooth_isotonic"</code></h3>
+              <h3><code>method="monotone_spline"</code></h3>
               <p>
-                A smoother monotone map built from the isotonic fit. Useful when the raw
-                staircase is too rough for downstream use.
+                A smooth monotone transformation estimated by a constrained spline fit with a
+                smoothness penalty.
               </p>
             </article>
             <article class="argument-card">
@@ -401,8 +397,8 @@ diagnose_calibration(...)</code></pre>
               <p class="eyebrow">Quickstart</p>
               <h2>Minimal end-to-end examples</h2>
               <p>
-                The main idea is the same in both languages: fit a calibrator on raw scores,
-                predict calibrated scores, then diagnose how much calibration error remains.
+                Fit a calibrator, predict calibrated scores, then diagnose the remaining
+                calibration error.
               </p>
             </div>
           </div>
@@ -473,7 +469,8 @@ diag &lt;- diagnose_calibration(
               <code>diagnose_calibration()</code> estimates calibration error with a doubly
               robust procedure and reports uncertainty using balanced jackknife folds. It can
               compare raw and calibrated predictions directly through
-              <code>comparison_predictions</code>.
+              <code>comparison_predictions</code>. Use <code>assess_overlap()</code> before
+              fitting when you want a quick overlap severity check and a loss recommendation.
             </p>
           </div>
         </section>
@@ -531,7 +528,7 @@ diag &lt;- diagnose_calibration(
 
           <div class="footer-links">
             <a class="footer-link" href="https://github.com/Larsvanderlaan/causalCalibration">GitHub repository</a>
-            <a class="footer-link" href="https://proceedings.mlr.press/v202/van-der-laan23a.html">ICML 2023 paper</a>
+            <a class="footer-link" href="https://proceedings.mlr.press/v202/van-der-laan23a/van-der-laan23a.pdf">ICML 2023 paper</a>
             <a class="footer-link" href="https://arxiv.org/abs/2302.14011">arXiv paper</a>
             <a class="footer-link" href="https://arxiv.org/abs/2203.13364">Calibration error paper</a>
             <a class="footer-link" href="https://academic.oup.com/biomet/article/108/2/299/5911092">Nie and Wager (2021)</a>

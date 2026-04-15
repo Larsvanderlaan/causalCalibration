@@ -141,7 +141,7 @@ a {
 
 .hero-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+  grid-template-columns: minmax(0, 1.06fr) minmax(430px, 0.94fr);
   gap: 26px;
   margin-top: 22px;
   align-items: stretch;
@@ -290,6 +290,7 @@ a {
 .hero-panel {
   display: grid;
   gap: 18px;
+  min-width: 0;
 }
 
 .hero-stat-grid {
@@ -339,6 +340,18 @@ a {
   padding: 22px 24px 24px;
 }
 
+.quick-start-card .example-entry {
+  padding: 16px;
+  min-width: 0;
+}
+
+.quick-start-card .inline-code {
+  padding: 14px 16px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
 .panel-label,
 .stack-name,
 .mini-label,
@@ -366,6 +379,8 @@ a {
 pre {
   margin: 0;
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .code-card pre,
@@ -424,6 +439,7 @@ li {
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
   padding: 18px;
+  min-width: 0;
 }
 
 .argument-grid,
@@ -652,8 +668,8 @@ li {
 }
 
 .quick-start-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
+  grid-template-columns: 1fr;
+  gap: 14px;
 }
 
 .chip-row {
