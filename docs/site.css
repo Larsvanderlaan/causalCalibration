@@ -292,6 +292,24 @@ a {
   gap: 18px;
 }
 
+.hero-stat-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.hero-stat {
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.hero-stat strong {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 1.18rem;
+}
+
 .panel-card,
 .section,
 .argument-card,
@@ -315,6 +333,10 @@ a {
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.66), rgba(255, 255, 255, 0.46)),
     linear-gradient(135deg, rgba(215, 242, 235, 0.85), rgba(255, 227, 191, 0.78));
+}
+
+.quick-start-card {
+  padding: 22px 24px 24px;
 }
 
 .panel-label,
@@ -390,6 +412,20 @@ li {
   line-height: 1.72;
 }
 
+.example-entry-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.example-entry {
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 18px;
+}
+
 .argument-grid,
 .comparison-grid,
 .method-grid,
@@ -405,6 +441,12 @@ li {
 
 .comparison-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.two-col-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
 }
 
 .method-grid {
@@ -453,6 +495,103 @@ li {
   grid-template-columns: minmax(0, 1fr) 34px minmax(0, 1fr) 34px minmax(0, 1fr);
   gap: 16px;
   align-items: center;
+}
+
+.calibration-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.calibration-card {
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.calibration-card .panel-label {
+  margin-bottom: 0;
+}
+
+.calibration-card h3 {
+  margin: 0;
+  font-size: clamp(1.8rem, 3vw, 2.35rem);
+  line-height: 1.02;
+  max-width: 14ch;
+  font-family: "Source Serif 4", Georgia, serif;
+  letter-spacing: -0.03em;
+}
+
+.calibration-card .schematic-card {
+  margin: 2px 0 4px;
+  padding: 18px;
+}
+
+.calibration-card > p:last-child {
+  margin: 0;
+  font-size: 1.02rem;
+  line-height: 1.65;
+}
+
+.schematic-card {
+  margin: 14px 0;
+  padding: 12px;
+  border-radius: 20px;
+  border: 1px solid var(--line);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.84), rgba(215, 242, 235, 0.34)),
+    rgba(255, 255, 255, 0.8);
+}
+
+.schematic-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.axis-line {
+  stroke: rgba(22, 50, 61, 0.46);
+  stroke-width: 1.6;
+}
+
+.guide-line {
+  stroke: rgba(22, 50, 61, 0.2);
+  stroke-width: 1.5;
+  stroke-dasharray: 6 5;
+}
+
+.raw-line {
+  fill: none;
+  stroke: var(--warm);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.cal-line {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.axis-label,
+.legend-label {
+  fill: var(--muted);
+  font-family: "Space Grotesk", "Avenir Next", "Trebuchet MS", sans-serif;
+  font-size: 12px;
+}
+
+.calibration-summary {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.7;
 }
 
 .workflow-step {
@@ -512,6 +651,31 @@ li {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.quick-start-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.chip-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.chip-link {
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.74);
+  color: var(--ink);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.chip-link:hover {
+  transform: translateY(-1px);
+}
+
 .quickstart-card p:last-child,
 .doc-card p:last-child,
 .companion-card p:last-child {
@@ -536,7 +700,11 @@ li {
 }
 
 .companion-card {
-  display: block;
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  gap: 20px;
+  align-items: center;
+  padding: 20px 22px;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -545,6 +713,25 @@ li {
   margin-top: 8px;
   color: var(--accent-strong);
   font-weight: 700;
+}
+
+.companion-card-badge {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.companion-card-copy h3 {
+  margin: 0 0 8px;
+}
+
+.companion-card-copy p:last-of-type {
+  margin-bottom: 0;
+}
+
+.footer-card {
+  margin-top: 26px;
+  padding: 22px;
 }
 
 .site-footer {
@@ -583,6 +770,8 @@ li {
   .section-heading.split,
   .comparison-grid,
   .quickstart-grid,
+  .calibration-grid,
+  .two-col-grid,
   .doc-grid,
   .companion-grid,
   .method-grid {
@@ -627,7 +816,21 @@ li {
     grid-template-columns: 1fr;
   }
 
+  .example-entry-grid {
+    grid-template-columns: 1fr;
+  }
+
   .topbar {
     border-radius: 28px;
+  }
+
+  .companion-card {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .companion-card-badge {
+    width: min(132px, 100%);
+    margin: 0 auto;
   }
 }

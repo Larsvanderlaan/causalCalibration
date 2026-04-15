@@ -22,13 +22,13 @@
         <nav class="topbar">
           <div class="brand"><a href="./index.html">causalCalibration</a></div>
           <div class="toplinks">
-            <a href="#why">Why</a>
-            <a href="#workflow">Workflow</a>
-            <a href="#cross">Cross vs Standard</a>
-            <a href="#losses">Losses</a>
-            <a href="#methods">Methods</a>
+            <a href="#start-here">Overview</a>
+            <a href="#install">Install</a>
+            <a href="#calibration">Why Calibration</a>
+            <a href="#workflows">Cross vs Standard</a>
+            <a href="#losses-methods">Losses and Methods</a>
             <a href="#quickstart">Quickstart</a>
-            <a href="#resources">Resources</a>
+            <a href="#references">References</a>
             <a href="https://github.com/Larsvanderlaan/causalCalibration">GitHub</a>
           </div>
           <a class="paper-link" href="https://arxiv.org/abs/2302.14011">
@@ -41,336 +41,376 @@
           <section class="hero-copy">
             <p class="eyebrow">Heterogeneous Treatment Effects</p>
             <div class="hero-head">
-              <h1>Calibrate treatment-effect scores so their scale means something</h1>
+              <h1 class="hero-title-main">Causal calibration for treatment-effect predictions</h1>
               <div class="hero-art">
                 <img
-                  src="./assets/causal-calibration-badge.svg"
-                  alt="Circular causalCalibration badge with a calibration plot and package name"
+                  src="./assets/causal-calibration-badge-mark.svg"
+                  alt="Circular causalCalibration package badge with a calibration plot"
                   width="1024"
                   height="1024"
                 />
               </div>
             </div>
             <p class="lede">
-              <code>causalCalibration</code> wraps around an HTE model you already trained and
-              recalibrates its treatment-effect predictions. The package provides
-              standard calibration, pooled cross-calibration, and doubly robust
-              diagnostics in both Python and R.
-            </p>
-            <p class="panel-note">
-              Calibration is about getting the effect scale right, not just the ranking.
-              A model can sort units reasonably well and still overstate or understate the
-              treatment effect in the tails.
+              <a href="https://arxiv.org/abs/2302.14011"><code>causalCalibration</code></a>
+              calibrates treatment-effect scores after you have already trained an HTE model.
+              It implements the workflow from the causal isotonic calibration paper together
+              with pooled cross-calibration, practical alternative calibration maps, and
+              doubly robust diagnostics in Python and R.
             </p>
             <div class="hero-actions">
               <a class="button button-primary" href="#quickstart">Get started</a>
-              <a class="button button-secondary" href="#cross">Choose a workflow</a>
-              <a
-                class="button button-secondary"
-                href="https://github.com/Larsvanderlaan/causalCalibration/blob/main/examples/python-workflow.ipynb"
-              >
-                Python notebook
-              </a>
+              <a class="button button-secondary" href="#workflows">Choose a workflow</a>
+              <a class="button button-secondary" href="https://github.com/Larsvanderlaan/causalCalibration/blob/main/examples/python-workflow.ipynb">Examples</a>
             </div>
             <ul class="hero-pills">
-              <li>Python and R interfaces</li>
-              <li><code>dr</code> and <code>r</code> calibration losses</li>
-              <li>Median-aggregated pooled cross-calibration</li>
-              <li>Calibration-error diagnostics with uncertainty</li>
+              <li>Standard calibration and pooled cross-calibration</li>
+              <li><code>dr</code> and <code>r</code> loss targets</li>
+              <li>Isotonic, smooth isotonic, linear, and histogram maps</li>
             </ul>
           </section>
 
           <aside class="hero-panel">
             <div class="panel-card gradient-card">
-              <p class="panel-label">Best starting workflow</p>
-              <div class="default-stack">
-                <div>
-                  <span class="stack-name">Function</span>
-                  <strong><code>fit_cross_calibrator()</code></strong>
+              <p class="panel-label">At a glance</p>
+              <div class="hero-stat-grid">
+                <div class="hero-stat">
+                  <strong>Interfaces</strong>
+                  <span><code>fit_calibrator()</code>, <code>fit_cross_calibrator()</code>, and <code>diagnose_calibration()</code> are available in Python and R.</span>
                 </div>
-                <div>
-                  <span class="stack-name">Loss</span>
-                  <strong><code>loss="dr"</code></strong>
+                <div class="hero-stat">
+                  <strong>Core use case</strong>
+                  <span>Take a raw CATE score from any learner and put it onto an interpretable effect scale.</span>
                 </div>
-                <div>
-                  <span class="stack-name">Method</span>
-                  <strong><code>method="isotonic"</code></strong>
+                <div class="hero-stat">
+                  <strong>Cross-calibration</strong>
+                  <span>Fit on pooled out-of-fold predictions, then calibrate fold-specific predictions and aggregate by the median.</span>
                 </div>
               </div>
-              <p class="panel-note">
-                Use standard calibration instead when you only have one prediction per unit
-                or a separate holdout calibration sample.
-              </p>
             </div>
 
-            <div class="panel-card code-card">
-              <p class="panel-label">Main Python pattern</p>
-              <pre><code>from causal_calibration import fit_cross_calibrator
+            <div class="panel-card quick-start-card">
+              <p class="panel-label">Quick start</p>
+              <div class="example-entry-grid quick-start-grid">
+                <div class="example-entry">
+                  <p class="example-label">Python</p>
+                  <p class="mini-label">Cross-calibration</p>
+                  <pre class="inline-code"><code>from causal_calibration import fit_cross_calibrator
 
-cross_cal = fit_cross_calibrator(
-    predictions=tau_oof,
-    fold_predictions=tau_fold_matrix,
-    treatment=a,
-    outcome=y,
-    mu0=mu0_hat,
-    mu1=mu1_hat,
-    propensity=e_hat,
-    loss="dr",
-    method="isotonic",
-)
-
+cross_cal = fit_cross_calibrator(...)
 tau_star = cross_cal.predict(tau_fold_matrix)</code></pre>
+                </div>
+                <div class="example-entry">
+                  <p class="example-label">R</p>
+                  <p class="mini-label">Standard calibration</p>
+                  <pre class="inline-code"><code>library(causalCalibration)
+
+cal &lt;- fit_calibrator(...)
+tau_star &lt;- predict(cal, tau_new)</code></pre>
+                </div>
+              </div>
             </div>
           </aside>
         </div>
       </header>
 
       <main>
-        <section class="section" id="why">
+        <section class="section" id="start-here">
           <div class="section-heading split">
             <div>
-              <p class="eyebrow">Why Calibration</p>
-              <h2>Why raw CATE predictions are not enough</h2>
+              <p class="eyebrow">Overview</p>
+              <h2>What is this package for?</h2>
+              <p>
+                The package is for the part of the workflow that comes after HTE estimation.
+                You bring raw treatment-effect predictions plus the nuisance estimates needed by
+                your chosen loss. The package then fits a post-hoc calibration map, produces
+                calibrated scores, and can estimate remaining calibration error.
+              </p>
             </div>
-            <p class="section-side-note">
-              The ICML paper makes the key distinction: a useful HTE predictor can still be
-              poorly calibrated in magnitude, especially in the extremes.
-            </p>
+          </div>
+
+          <div class="comparison-grid">
+            <article class="comparison-card">
+              <p class="panel-label">Main workflow</p>
+              <h3>Calibrate an existing treatment-effect model</h3>
+              <p>
+                This package does not compete with your upstream learner. It wraps around
+                it. That makes it easy to add calibration to DR-learners, R-learners,
+                T-learners, forests, boosting, or any other black-box HTE pipeline.
+              </p>
+              <pre class="inline-code"><code>fit_calibrator(...)
+fit_cross_calibrator(...)
+diagnose_calibration(...)</code></pre>
+            </article>
+
+            <article class="comparison-card">
+              <p class="panel-label">Why it matters</p>
+              <h3>A good ranking can still have the wrong effect scale</h3>
+              <p>
+                The paper’s motivation is simple: treatment-effect scores may still be useful
+                for ranking or subgrouping even when they overstate or understate the true
+                effect in the tails. Calibration is the step that corrects that scale.
+              </p>
+            </article>
+          </div>
+
+          <div class="chip-row" style="margin-top: 18px;">
+            <a class="chip-link" href="https://github.com/Larsvanderlaan/causalCalibration/blob/main/examples/python-workflow.ipynb">Python notebook</a>
+            <a class="chip-link" href="https://github.com/Larsvanderlaan/causalCalibration/blob/main/r/causalCalibration/vignettes/getting-started.Rmd">R vignette</a>
+            <a class="chip-link" href="https://proceedings.mlr.press/v202/van-der-laan23a.html">ICML 2023 paper</a>
+          </div>
+        </section>
+
+        <section class="section" id="install">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Installation</p>
+              <h2>How do I install it?</h2>
+              <p>
+                The repository provides native Python and R interfaces. The simplest local
+                installs are below, along with GitHub-based installs when you want to pull
+                directly from the repo.
+              </p>
+            </div>
           </div>
 
           <div class="argument-grid">
             <article class="argument-card">
-              <h3>Ranking is not scale</h3>
-              <p>
-                An HTE learner can correctly sort who benefits more while still
-                exaggerating high predicted effects or pushing low predicted effects too far
-                downward.
-              </p>
+              <p class="mini-label">Python</p>
+              <h3>Local editable install</h3>
+              <pre class="inline-code"><code>python3 -m pip install -e python</code></pre>
             </article>
             <article class="argument-card">
-              <h3>Decisions need magnitude</h3>
-              <p>
-                If treatment assignment depends on whether a score is above zero or above a
-                practical threshold, miscalibration can turn a decent ranking model into a
-                poor decision rule.
-              </p>
+              <p class="mini-label">Python</p>
+              <h3>GitHub install</h3>
+              <pre class="inline-code"><code>python3 -m pip install "git+https://github.com/Larsvanderlaan/causalCalibration.git#subdirectory=python"</code></pre>
             </article>
             <article class="argument-card">
-              <h3>Calibration is a wrap-around step</h3>
-              <p>
-                You do not need to retrain your whole causal learner. The package learns a
-                calibration map on top of the predictions you already have and preserves the
-                basic ordering for monotone methods.
-              </p>
+              <p class="mini-label">R</p>
+              <h3>GitHub install</h3>
+              <pre class="inline-code"><code>remotes::install_github(
+  "Larsvanderlaan/causalCalibration",
+  subdir = "r/causalCalibration"
+)</code></pre>
             </article>
-          </div>
-
-          <div class="callout">
-            <strong>What calibration means here</strong>
-            <p>
-              A calibrated treatment-effect score is one where units with the same predicted
-              score have, on average, a treatment effect close to that score. That is the
-              user-facing intuition behind both the paper and the package API.
-            </p>
           </div>
         </section>
 
-        <section class="section" id="workflow">
+        <section class="section" id="calibration">
           <div class="section-heading">
-            <p class="eyebrow">How It Works</p>
-            <h2>Three pieces: predictions, nuisance inputs, calibration map</h2>
-            <p>
-              The package does not train a treatment-effect learner for you. It assumes you
-              already have raw HTE predictions and then fits a post-hoc calibration map using
-              either a doubly robust pseudo-outcome or an R-loss style target.
-            </p>
+            <div>
+              <p class="eyebrow">Calibration</p>
+              <h2>Why calibration matters for CATE models</h2>
+              <p>
+                A raw treatment-effect score can be directionally helpful without being
+                numerically trustworthy. Calibration turns the score into something closer to
+                “units with this prediction really have this average treatment effect.”
+              </p>
+            </div>
           </div>
 
-          <div class="workflow-strip" role="img" aria-label="Workflow showing raw HTE predictions, fit a calibration map, and produce calibrated treatment-effect scores.">
-            <article class="workflow-step">
-              <p class="workflow-step-label">Step 1</p>
-              <h3>Bring predictions</h3>
-              <p>Start with raw treatment-effect scores from any learner you trust enough to use.</p>
+          <div class="schematic-card calibration-flow-card">
+            <div class="workflow-strip" role="img" aria-label="Workflow schematic showing treatment-effect predictions, calibration, and diagnostics.">
+              <article class="workflow-step workflow-step-plain">
+                <p class="workflow-step-label">Step 1</p>
+                <h3>Bring predictions</h3>
+                <p>Start from a raw HTE score and the nuisance estimates needed to build the calibration target.</p>
+              </article>
+              <div class="workflow-connector" aria-hidden="true"></div>
+              <article class="workflow-step workflow-step-accent">
+                <p class="workflow-step-label">Step 2</p>
+                <h3>Fit a map</h3>
+                <p>Learn a monotone or simple recalibration map from raw scores to calibrated scores.</p>
+              </article>
+              <div class="workflow-connector" aria-hidden="true"></div>
+              <article class="workflow-step workflow-step-warm">
+                <p class="workflow-step-label">Step 3</p>
+                <h3>Predict and check</h3>
+                <p>Apply the map to new scores and use diagnostics to quantify remaining calibration error.</p>
+              </article>
+            </div>
+          </div>
+
+          <div class="calibration-grid">
+            <article class="calibration-card">
+              <p class="panel-label">Scale Correction</p>
+              <h3>Calibration fixes magnitude, not just ordering</h3>
+              <div class="schematic-card">
+                <svg class="schematic-svg" viewBox="0 0 260 180" role="img" aria-label="Calibration schematic showing raw predictions and a calibrated monotone map.">
+                  <line x1="36" y1="22" x2="36" y2="146" class="axis-line" />
+                  <line x1="36" y1="146" x2="232" y2="146" class="axis-line" />
+                  <line x1="52" y1="130" x2="216" y2="34" class="guide-line" />
+                  <path d="M52 118 C84 110, 112 90, 142 90 C168 90, 194 72, 216 44" class="raw-line" />
+                  <path d="M52 128 L100 128 L100 98 L154 98 L154 70 L216 36" class="cal-line" />
+                  <text x="134" y="167" class="axis-label" text-anchor="middle">Raw score</text>
+                  <text x="16" y="88" class="axis-label" text-anchor="middle" transform="rotate(-90 16 88)">Average treatment effect</text>
+                  <text x="180" y="102" class="legend-label">Raw</text>
+                  <text x="186" y="58" class="legend-label">Calibrated</text>
+                </svg>
+              </div>
+              <p>
+                If a learner overstates high predicted effects or compresses the middle,
+                calibration can restore a more honest effect scale while preserving the basic
+                ranking structure for monotone methods.
+              </p>
             </article>
-            <div class="workflow-connector" aria-hidden="true"></div>
-            <article class="workflow-step workflow-step-accent">
-              <p class="workflow-step-label">Step 2</p>
-              <h3>Fit the map</h3>
-              <p>Use observed outcomes, treatment, and nuisance estimates to learn a calibration function.</p>
-            </article>
-            <div class="workflow-connector" aria-hidden="true"></div>
-            <article class="workflow-step workflow-step-warm">
-              <p class="workflow-step-label">Step 3</p>
-              <h3>Predict calibrated scores</h3>
-              <p>Apply the fitted map to new predictions and check remaining calibration error.</p>
+
+            <article class="calibration-card">
+              <p class="panel-label">Decision Support</p>
+              <h3>Clearer scores support clearer treatment decisions</h3>
+              <div class="schematic-card">
+                <svg class="schematic-svg" viewBox="0 0 260 180" role="img" aria-label="Decision schematic showing thresholding on calibrated treatment effect scores.">
+                  <line x1="36" y1="22" x2="36" y2="146" class="axis-line" />
+                  <line x1="36" y1="146" x2="232" y2="146" class="axis-line" />
+                  <line x1="36" y1="92" x2="232" y2="92" class="guide-line" />
+                  <path d="M50 128 L104 128 L104 92 L162 92 L162 54 L218 54" class="cal-line" />
+                  <path d="M162 22 L162 146" class="guide-line" />
+                  <text x="134" y="167" class="axis-label" text-anchor="middle">Calibrated score</text>
+                  <text x="16" y="88" class="axis-label" text-anchor="middle" transform="rotate(-90 16 88)">Action value</text>
+                  <text x="178" y="84" class="legend-label">Decision threshold</text>
+                </svg>
+              </div>
+              <p>
+                When a score is used to target treatment, sign and magnitude both matter.
+                Calibration makes thresholding more transparent because the score is closer to
+                the average effect among units receiving that score.
+              </p>
             </article>
           </div>
 
-          <div class="callout">
-            <strong>Paper-to-package translation</strong>
-            <p>
-              The paper studies causal isotonic calibration and cross-calibration. The package
-              keeps isotonic as the core method, adds smooth and simpler practical backends,
-              and exposes both ordinary calibration and pooled cross-calibration through a
-              small API.
-            </p>
+          <p class="calibration-summary">
+            In the paper’s language, calibration is the property that units with the same
+            prediction have an average treatment effect close to that prediction. That is the
+            conceptual center of this package.
+          </p>
+        </section>
+
+        <section class="section" id="workflows">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Workflows</p>
+              <h2>Should I use standard calibration or cross-calibration?</h2>
+              <p>
+                This is the first major workflow choice. The answer depends on whether your
+                upstream HTE learner already used cross-fitting and whether you saved the
+                fold-specific prediction objects.
+              </p>
+            </div>
+          </div>
+
+          <div class="argument-grid">
+            <article class="argument-card">
+              <h3>Use standard calibration</h3>
+              <p>
+                Choose <code>fit_calibrator()</code> when you have a single prediction per
+                observation or a separate holdout sample that you want to reserve for
+                calibration.
+              </p>
+              <p><strong>Inputs:</strong> <code>predictions</code>, treatment, outcome, and nuisance estimates.</p>
+            </article>
+            <article class="argument-card">
+              <h3>Use cross-calibration</h3>
+              <p>
+                Choose <code>fit_cross_calibrator()</code> when the learner was trained with
+                cross-fitting and you want to calibrate in sample without carving off a second
+                holdout set.
+              </p>
+              <p><strong>Inputs:</strong> pooled OOF <code>predictions</code> plus an <code>n x K</code> matrix of fold-specific predictions.</p>
+            </article>
+            <article class="argument-card">
+              <h3>How prediction works afterward</h3>
+              <p>
+                The current implementation fits one calibration map on pooled OOF predictions,
+                applies that map to each fold-specific column, and aggregates row-wise by the
+                median.
+              </p>
+              <p><strong>Prediction contract:</strong> <code>predict(cross_calibrator, fold_predictions)</code></p>
+            </article>
+          </div>
+
+          <div class="chip-row" style="margin-top: 18px;">
+            <a class="chip-link" href="https://github.com/Larsvanderlaan/causalCalibration/blob/main/docs/cross-calibration.qmd">Cross-calibration notes</a>
+            <a class="chip-link" href="https://github.com/Larsvanderlaan/causalCalibration/blob/main/docs/standard-calibration.qmd">Standard calibration notes</a>
           </div>
         </section>
 
-        <section class="section" id="cross">
-          <div class="section-heading split">
+        <section class="section" id="losses-methods">
+          <div class="section-heading">
             <div>
-              <p class="eyebrow">Workflow Choice</p>
-              <h2>Standard calibration versus cross-calibration</h2>
-            </div>
-            <p class="section-side-note">
-              This is the first decision most users should make, because it determines which
-              prediction objects you need to save from the upstream HTE fit.
-            </p>
-          </div>
-
-          <div class="comparison-grid">
-            <article class="comparison-card">
-              <p class="panel-label">Standard</p>
-              <h3><code>fit_calibrator()</code></h3>
+              <p class="eyebrow">Losses and Methods</p>
+              <h2>What do we implement?</h2>
               <p>
-                Use this when you have a single prediction per observation or a separate
-                calibration sample.
+                There are two conceptual loss choices and four calibration backends. The loss
+                decides which population you are calibrating for; the method decides the shape
+                of the calibration map.
               </p>
-              <ul>
-                <li>Inputs: <code>predictions</code>, treatment, outcome, and nuisance estimates.</li>
-                <li>Best when calibration happens on a dedicated holdout set.</li>
-                <li>Also fine for simple workflows where you only saved one score vector.</li>
-              </ul>
-            </article>
-
-            <article class="comparison-card">
-              <p class="panel-label">Cross</p>
-              <h3><code>fit_cross_calibrator()</code></h3>
-              <p>
-                Use this when the HTE learner itself was cross-fitted and you want to fit and
-                calibrate in sample without carving out a separate calibration split.
-              </p>
-              <ul>
-                <li>Fit on pooled OOF <code>predictions</code>.</li>
-                <li>Predict from an <code>n x K</code> or <code>m x K</code> matrix of fold-specific predictions.</li>
-                <li>Current implementation aggregates calibrated fold predictions with the median.</li>
-              </ul>
-            </article>
-          </div>
-
-          <div class="callout">
-            <strong>What "cross" means in this implementation</strong>
-            <p>
-              The packaged cross-calibrator is the pooled variant: it fits one calibration map
-              on pooled out-of-fold predictions, applies that map to each fold-specific column,
-              and then returns the order-statistic median row by row.
-            </p>
-          </div>
-        </section>
-
-        <section class="section" id="losses">
-          <div class="section-heading split">
-            <div>
-              <p class="eyebrow">Losses</p>
-              <h2>Choose the target population before choosing the backend</h2>
             </div>
-            <p class="section-side-note">
-              The loss is the conceptual choice. The method is mostly a shape choice for the
-              calibration map you fit afterward.
-            </p>
           </div>
 
-          <div class="comparison-grid">
-            <article class="comparison-card">
-              <p class="panel-label">Original Population</p>
+          <div class="argument-grid">
+            <article class="argument-card">
               <h3><code>loss="dr"</code></h3>
               <p>
-                The doubly robust loss calibrates toward the original study population and is
-                usually the most natural first choice.
+                Doubly robust calibration for the original study population. This is the
+                natural default when you want calibrated scores to speak to the observed
+                population directly.
               </p>
-              <ul>
-                <li>Requires <code>mu0</code>, <code>mu1</code>, and <code>propensity</code>.</li>
-                <li>Matches the treatment-effect framing in the causal calibration paper.</li>
-                <li>Can be less stable when overlap is weak because inverse-propensity behavior matters.</li>
-              </ul>
             </article>
-
-            <article class="comparison-card">
-              <p class="panel-label">Overlap-Weighted Population</p>
+            <article class="argument-card">
               <h3><code>loss="r"</code></h3>
               <p>
-                The R-loss emphasizes the overlap region through residualized treatment
-                weights, which can be preferable when propensity scores are extreme.
-              </p>
-              <ul>
-                <li>Requires <code>outcome_mean</code> and <code>propensity</code>.</li>
-                <li>Targets an overlap-weighted population rather than the raw study population.</li>
-                <li>Good fallback when you want more robust behavior under weak overlap.</li>
-              </ul>
-            </article>
-          </div>
-        </section>
-
-        <section class="section" id="methods">
-          <div class="section-heading">
-            <p class="eyebrow">Implemented Methods</p>
-            <h2>What the package actually implements</h2>
-            <p>
-              Both the Python and R packages expose the same four calibration backends.
-              Isotonic is the paper-native choice; the others are practical alternatives for
-              smoother or more transparent recalibration.
-            </p>
-          </div>
-
-          <div class="method-grid">
-            <article class="method-card">
-              <h3><code>isotonic</code></h3>
-              <p>
-                Monotone stepwise recalibration. This is the closest match to the ICML paper
-                and the default method most users should start with.
+                R-loss calibration for an overlap-weighted population. This is often more
+                stable under weak overlap, but it answers a different target-population
+                question.
               </p>
             </article>
-            <article class="method-card">
-              <h3><code>smooth_isotonic</code></h3>
+            <article class="argument-card">
+              <h3><code>method="isotonic"</code></h3>
               <p>
-                Starts from isotonic blocks and smooths them into a monotone curve. Use this
-                when the isotonic staircase is too rough for your downstream use.
+                The paper-native choice: monotone, nonparametric, and the main method most
+                users should start with.
               </p>
             </article>
-            <article class="method-card">
-              <h3><code>linear</code></h3>
+            <article class="argument-card">
+              <h3><code>method="smooth_isotonic"</code></h3>
               <p>
-                A nonnegative-slope linear recalibration. Useful when you want a simple,
-                low-variance correction and an easily interpretable map.
+                A smoother monotone map built from the isotonic fit. Useful when the raw
+                staircase is too rough for downstream use.
               </p>
             </article>
-            <article class="method-card">
-              <h3><code>histogram</code></h3>
+            <article class="argument-card">
+              <h3><code>method="linear"</code></h3>
               <p>
-                Weighted piecewise-constant binning. Good as a coarse baseline or when you
-                want a deliberately transparent map.
+                A nonnegative-slope linear recalibration. This is the simplest low-variance
+                choice and the easiest to interpret.
+              </p>
+            </article>
+            <article class="argument-card">
+              <h3><code>method="histogram"</code></h3>
+              <p>
+                Coarse piecewise-constant binning. Transparent and easy to inspect, especially
+                as a diagnostic baseline.
               </p>
             </article>
           </div>
         </section>
 
         <section class="section" id="quickstart">
-          <div class="section-heading split">
+          <div class="section-heading">
             <div>
               <p class="eyebrow">Quickstart</p>
-              <h2>Minimal Python and R examples</h2>
+              <h2>Minimal end-to-end examples</h2>
+              <p>
+                The main idea is the same in both languages: fit a calibrator on raw scores,
+                predict calibrated scores, then diagnose how much calibration error remains.
+              </p>
             </div>
-            <p class="section-side-note">
-              Install from the repo root with <code>python3 -m pip install -e python</code> or
-              <code>install.packages("r/causalCalibration", repos = NULL, type = "source")</code>.
-            </p>
           </div>
 
-          <div class="quickstart-grid">
-            <article class="panel-card quickstart-card">
-              <p class="panel-label">Python</p>
-              <pre><code>from causal_calibration import (
+          <div class="example-entry-grid">
+            <div class="example-entry">
+              <p class="example-label">Python</p>
+              <pre class="inline-code"><code>from causal_calibration import (
     fit_calibrator,
     diagnose_calibration,
 )
@@ -397,11 +437,10 @@ diag = diagnose_calibration(
     mu1=mu1_hat,
     propensity=e_hat,
 )</code></pre>
-            </article>
-
-            <article class="panel-card quickstart-card">
-              <p class="panel-label">R</p>
-              <pre><code>library(causalCalibration)
+            </div>
+            <div class="example-entry">
+              <p class="example-label">R</p>
+              <pre class="inline-code"><code>library(causalCalibration)
 
 cal &lt;- fit_calibrator(
   predictions = tau_hat,
@@ -425,90 +464,83 @@ diag &lt;- diagnose_calibration(
   mu1 = mu1_hat,
   propensity = e_hat
 )</code></pre>
-            </article>
+            </div>
           </div>
 
           <div class="callout">
-            <strong>Diagnostics are part of the workflow</strong>
+            <strong>Diagnostics are part of the package contract</strong>
             <p>
               <code>diagnose_calibration()</code> estimates calibration error with a doubly
-              robust procedure, supports before-versus-after comparisons through
-              <code>comparison_predictions</code>, and reports uncertainty using balanced
-              jackknife folds.
+              robust procedure and reports uncertainty using balanced jackknife folds. It can
+              compare raw and calibrated predictions directly through
+              <code>comparison_predictions</code>.
             </p>
           </div>
         </section>
 
-        <section class="section" id="resources">
+        <section class="section" id="references">
           <div class="section-heading">
-            <p class="eyebrow">Resources</p>
-            <h2>Examples, references, and companion packages</h2>
+            <p class="eyebrow">References</p>
+            <h2>Where are the paper and related resources?</h2>
             <p>
-              The site is intentionally compact. Use the repo materials below when you want a
-              deeper walkthrough or the original methodological references.
+              The package is based on the ICML 2023 causal isotonic calibration paper and the
+              companion calibration-error literature for HTEs. Related packages from the same
+              ecosystem are linked below.
             </p>
           </div>
 
-          <div class="doc-grid">
-            <article class="doc-card">
-              <h3>Examples and docs</h3>
-              <p>
-                The notebook and vignette show the end-to-end workflow. The repo also keeps
-                the longer method notes in the <code>docs/</code> source files.
-              </p>
-              <div class="doc-links">
-                <a class="doc-link" href="https://github.com/Larsvanderlaan/causalCalibration/blob/main/examples/python-workflow.ipynb">Python notebook</a>
-                <a class="doc-link" href="https://github.com/Larsvanderlaan/causalCalibration/blob/main/r/causalCalibration/vignettes/getting-started.Rmd">R vignette</a>
-                <a class="doc-link" href="https://github.com/Larsvanderlaan/causalCalibration/tree/main/docs">Docs source</a>
-              </div>
-            </article>
-
-            <article class="doc-card">
-              <h3>Method references</h3>
-              <p>
-                The package is grounded in the causal isotonic calibration paper and the
-                calibration-error literature for HTEs, with practical loss choices informed by
-                DR-learner and R-learner style constructions.
-              </p>
-              <div class="doc-links">
-                <a class="doc-link" href="https://proceedings.mlr.press/v202/van-der-laan23a.html">ICML 2023 paper</a>
-                <a class="doc-link" href="https://arxiv.org/abs/2302.14011">arXiv version</a>
-                <a class="doc-link" href="https://arxiv.org/abs/2203.13364">Calibration error paper</a>
-              </div>
-            </article>
-          </div>
-
-          <div class="companion-grid">
+          <div class="two-col-grid">
             <a class="companion-card" href="https://larsvanderlaan.github.io/calibratedDML/index.html">
-              <h3><code>calibratedDML</code></h3>
-              <p>
-                Companion package for calibrated debiased machine learning and doubly robust
-                inference for linear functionals.
-              </p>
-              <span class="companion-card-cta">Open companion site</span>
+              <img
+                class="companion-card-badge"
+                src="https://larsvanderlaan.github.io/calibratedDML/assets/calibrateddml-badge-mark.svg"
+                alt="calibratedDML package badge"
+                width="160"
+                height="160"
+              />
+              <div class="companion-card-copy">
+                <p class="panel-label">Companion package</p>
+                <h3><code>calibratedDML</code></h3>
+                <p>
+                  Calibrated debiased machine learning for doubly robust inference with
+                  flexible nuisance models.
+                </p>
+                <span class="companion-card-cta">Open the calibratedDML website</span>
+              </div>
             </a>
 
             <a class="companion-card" href="https://larsvanderlaan.github.io/ppi-aipw/index.html">
-              <h3><code>ppi_aipw</code></h3>
-              <p>
-                Companion package for semisupervised mean inference with AIPW and calibration.
-              </p>
-              <span class="companion-card-cta">Open companion site</span>
+              <img
+                class="companion-card-badge"
+                src="https://larsvanderlaan.github.io/ppi-aipw/assets/ppi-aipw-badge-mark.svg"
+                alt="ppi_aipw package badge"
+                width="160"
+                height="160"
+              />
+              <div class="companion-card-copy">
+                <p class="panel-label">Companion package</p>
+                <h3><code>ppi_aipw</code></h3>
+                <p>
+                  Semisupervised mean inference with AIPW, calibration, and uncertainty
+                  quantification.
+                </p>
+                <span class="companion-card-cta">Open the ppi_aipw website</span>
+              </div>
             </a>
+          </div>
+
+          <div class="footer-links">
+            <a class="footer-link" href="https://github.com/Larsvanderlaan/causalCalibration">GitHub repository</a>
+            <a class="footer-link" href="https://proceedings.mlr.press/v202/van-der-laan23a.html">ICML 2023 paper</a>
+            <a class="footer-link" href="https://arxiv.org/abs/2302.14011">arXiv paper</a>
+            <a class="footer-link" href="https://arxiv.org/abs/2203.13364">Calibration error paper</a>
+            <a class="footer-link" href="https://academic.oup.com/biomet/article/108/2/299/5911092">Nie and Wager (2021)</a>
+            <a class="footer-link" href="https://doi.org/10.48550/arXiv.2004.14497">Kennedy (2020)</a>
+            <a class="footer-link" href="https://github.com/Larsvanderlaan/causalCalibration/blob/main/examples/python-workflow.ipynb">Examples notebook</a>
+            <a class="footer-link" href="https://github.com/Larsvanderlaan/causalCalibration/blob/main/r/causalCalibration/vignettes/getting-started.Rmd">R vignette</a>
           </div>
         </section>
       </main>
-
-      <footer class="site-footer">
-        <div class="footer-head">
-          <p class="footer-title">causalCalibration</p>
-          <div class="footer-links">
-            <a class="footer-link" href="https://github.com/Larsvanderlaan/causalCalibration">GitHub</a>
-            <a class="footer-link" href="https://proceedings.mlr.press/v202/van-der-laan23a.html">ICML 2023</a>
-            <a class="footer-link" href="https://arxiv.org/abs/2302.14011">arXiv</a>
-          </div>
-        </div>
-      </footer>
     </div>
   </body>
 </html>
