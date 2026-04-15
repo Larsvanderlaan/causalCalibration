@@ -4,8 +4,7 @@ title: "Standard Calibration"
 
 # When standard calibration is the right tool
 
-Use standard calibration when you want a single calibration map from one prediction per observation.
-Use it when:
+Use standard calibration when you want a single calibration map from one prediction per observation and:
 
 - you already have a dedicated calibration split,
 - you are calibrating predictions on a held-out sample,

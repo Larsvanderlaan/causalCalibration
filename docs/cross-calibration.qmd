@@ -2,13 +2,13 @@
 title: "Cross-Calibration"
 ---
 
-# Why cross-calibration is central
+# When to use cross-calibration
 
 Cross-calibration is the main workflow when your upstream treatment-effect model was trained with cross-fitting.
 
 It lets you fit and calibrate in sample without spending a separate holdout calibration set.
 
-# What “fit and calibrate in sample” means here
+# What “fit and calibrate in sample” means
 
 It means:
 

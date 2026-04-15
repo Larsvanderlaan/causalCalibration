@@ -26,7 +26,7 @@ set.seed(11)
 
 # Overview
 
-This vignette shows the full package workflow:
+This vignette shows:
 
 - simulate a paper-style treatment-effect problem,
 - construct raw and cross-fitted prediction objects,
@@ -83,8 +83,6 @@ head(tau_calibrated)
 ```
 
 # Cross-calibration
-
-Cross-calibration is the central in-sample workflow when your learner produced cross-fitted predictions.
 
 - `predictions = tau_oof` are the pooled out-of-fold predictions used to fit the calibration map.
 - `fold_predictions = tau_fold_matrix` is the full `n x K` matrix used for prediction-time aggregation.
@@ -147,11 +145,9 @@ summary(diagnostics)
 
 # What population is being calibrated?
 
-The example above uses `loss = "dr"`, which targets calibration in the original study population. This is the natural choice when you want the calibrated scale to correspond to the observed population, but it relies on inverse-propensity weighting and can become less stable under weak overlap.
+The example above uses `loss = "dr"`, which targets calibration in the original study population. It relies on inverse-propensity weighting and can become less stable under weak overlap.
 
 If overlap is weak, `loss = "r"` may be more robust because the R-loss weighting emphasizes the overlap region. The tradeoff is interpretational: the calibrated scores then target an overlap-weighted population rather than the original study population.
-
-As a rule of thumb:
 
 - choose `dr` when original-population targeting matters and overlap is adequate,
 - choose `r` when overlap is weak and overlap-weighted targeting is acceptable.
