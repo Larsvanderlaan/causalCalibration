@@ -8,11 +8,12 @@ from .core import (
     fit_cross_calibrator,
     validate_crossfit_bundle,
 )
-from .diagnostics import CalibrationDiagnostics, CalibrationTargetResult, diagnose_calibration
+from .diagnostics import BLPDiagnosticsResult, CalibrationDiagnostics, CalibrationTargetResult, diagnose_calibration
 from .overlap import OverlapDiagnostics, assess_overlap
 
 __all__ = [
     "CalibrationBundle",
+    "BLPDiagnosticsResult",
     "CalibrationDiagnostics",
     "CalibrationTargetResult",
     "Calibrator",

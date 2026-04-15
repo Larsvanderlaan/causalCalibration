@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 from typing import Any
 from warnings import warn
@@ -24,6 +25,42 @@ from ._utils import (
 )
 from .core import _dr_pseudo_outcome, _r_pseudo_target
 from .overlap import OverlapDiagnostics, assess_overlap
+
+
+def _jackknife_standard_error(fold_estimates: list[float]) -> float:
+    mean_estimate = sum(fold_estimates) / len(fold_estimates)
+    variance = ((len(fold_estimates) - 1.0) / len(fold_estimates)) * sum(
+        (estimate - mean_estimate) ** 2 for estimate in fold_estimates
+    )
+    return variance ** 0.5
+
+
+def _normal_p_value(estimate: float, standard_error: float) -> float:
+    if standard_error <= 0:
+        return 0.0 if estimate != 0 else 1.0
+    z_score = abs(estimate / standard_error)
+    return math.erfc(z_score / math.sqrt(2.0))
+
+
+def _fit_weighted_linear_projection(
+    predictions: list[float],
+    pseudo_outcome: list[float],
+    sample_weight: list[float],
+) -> dict[str, float]:
+    total_weight = sum(sample_weight)
+    mean_x = sum(weight * value for weight, value in zip(sample_weight, predictions)) / total_weight
+    mean_y = sum(weight * value for weight, value in zip(sample_weight, pseudo_outcome)) / total_weight
+    sxx = sum(weight * (value - mean_x) ** 2 for weight, value in zip(sample_weight, predictions))
+    if sxx <= 1e-12:
+        slope = 0.0
+    else:
+        sxy = sum(
+            weight * (x_value - mean_x) * (y_value - mean_y)
+            for weight, x_value, y_value in zip(sample_weight, predictions, pseudo_outcome)
+        )
+        slope = sxy / sxx
+    intercept = mean_y - slope * mean_x
+    return {"intercept": intercept, "slope": slope}
 
 
 def _linear_loo_curve(
@@ -150,6 +187,80 @@ def _estimate_curve(
 
 
 @dataclass
+class BLPDiagnosticsResult:
+    intercept: float
+    intercept_standard_error: float
+    intercept_confidence_interval: tuple[float, float]
+    intercept_p_value: float
+    slope: float
+    slope_standard_error: float
+    slope_confidence_interval: tuple[float, float]
+    slope_p_value: float
+    slope_excludes_zero: bool
+    n_folds: int
+
+    def summary(self) -> dict[str, Any]:
+        return {
+            "intercept": self.intercept,
+            "intercept_standard_error": self.intercept_standard_error,
+            "intercept_confidence_interval": self.intercept_confidence_interval,
+            "intercept_p_value": self.intercept_p_value,
+            "slope": self.slope,
+            "slope_standard_error": self.slope_standard_error,
+            "slope_confidence_interval": self.slope_confidence_interval,
+            "slope_p_value": self.slope_p_value,
+            "slope_excludes_zero": self.slope_excludes_zero,
+            "jackknife_folds": self.n_folds,
+        }
+
+
+def _build_blp_result(
+    *,
+    predictions: list[float],
+    pseudo_outcome: list[float],
+    sample_weight: list[float],
+    fold_ids: list[int],
+    level: float,
+) -> BLPDiagnosticsResult:
+    full = _fit_weighted_linear_projection(predictions, pseudo_outcome, sample_weight)
+    unique_folds = sorted(set(fold_ids))
+    intercept_folds: list[float] = []
+    slope_folds: list[float] = []
+    for fold in unique_folds:
+        keep = [index for index, fold_id in enumerate(fold_ids) if fold_id != fold]
+        subset = _fit_weighted_linear_projection(
+            [predictions[index] for index in keep],
+            [pseudo_outcome[index] for index in keep],
+            [sample_weight[index] for index in keep],
+        )
+        intercept_folds.append(subset["intercept"])
+        slope_folds.append(subset["slope"])
+    intercept_standard_error = _jackknife_standard_error(intercept_folds)
+    slope_standard_error = _jackknife_standard_error(slope_folds)
+    z_score = normal_quantile(level)
+    intercept_interval = (
+        full["intercept"] - z_score * intercept_standard_error,
+        full["intercept"] + z_score * intercept_standard_error,
+    )
+    slope_interval = (
+        full["slope"] - z_score * slope_standard_error,
+        full["slope"] + z_score * slope_standard_error,
+    )
+    return BLPDiagnosticsResult(
+        intercept=full["intercept"],
+        intercept_standard_error=intercept_standard_error,
+        intercept_confidence_interval=intercept_interval,
+        intercept_p_value=_normal_p_value(full["intercept"], intercept_standard_error),
+        slope=full["slope"],
+        slope_standard_error=slope_standard_error,
+        slope_confidence_interval=slope_interval,
+        slope_p_value=_normal_p_value(full["slope"], slope_standard_error),
+        slope_excludes_zero=(slope_interval[0] > 0.0) or (slope_interval[1] < 0.0),
+        n_folds=len(unique_folds),
+    )
+
+
+@dataclass
 class CalibrationTargetResult:
     target_population: str
     estimate: float
@@ -160,6 +271,7 @@ class CalibrationTargetResult:
     curve_estimates: list[float]
     method: str
     n_folds: int
+    blp_diagnostic: BLPDiagnosticsResult
     fold_estimates: list[float] = field(default_factory=list)
     comparison_estimate: float | None = None
     comparison_standard_error: float | None = None
@@ -173,6 +285,7 @@ class CalibrationTargetResult:
             "confidence_interval": self.confidence_interval,
             "curve_method": self.method,
             "jackknife_folds": self.n_folds,
+            "blp": self.blp_diagnostic.summary(),
         }
         if self.comparison_estimate is not None:
             summary["comparison_estimate"] = self.comparison_estimate
@@ -200,6 +313,7 @@ class CalibrationDiagnostics:
     method: str
     n_folds: int
     target_population: str
+    blp_diagnostic: BLPDiagnosticsResult
     overlap_diagnostics: OverlapDiagnostics | None = None
     fold_estimates: list[float] = field(default_factory=list)
     comparison_estimate: float | None = None
@@ -216,6 +330,7 @@ class CalibrationDiagnostics:
             "confidence_interval": self.confidence_interval,
             "curve_method": self.method,
             "jackknife_folds": self.n_folds,
+            "blp": self.blp_diagnostic.summary(),
         }
         if self.comparison_estimate is not None:
             summary["comparison_estimate"] = self.comparison_estimate
@@ -240,6 +355,7 @@ class CalibrationDiagnostics:
             "estimate": self.estimate,
             "interval": self.confidence_interval,
             "target_population": self.target_population,
+            "blp": self.blp_diagnostic.summary(),
         }
         if self.target_population == "both":
             payload["dr_curve"] = [] if self.dr_result is None else self.dr_result.curve_frame()
@@ -307,11 +423,7 @@ def _build_target_result(
             fold_ids=[fold_ids[index] for index in keep],
         )
         fold_estimates.append(subset["estimate"])
-    mean_estimate = sum(fold_estimates) / len(fold_estimates)
-    variance = ((len(unique_folds) - 1.0) / len(unique_folds)) * sum(
-        (estimate - mean_estimate) ** 2 for estimate in fold_estimates
-    )
-    standard_error = variance ** 0.5
+    standard_error = _jackknife_standard_error(fold_estimates)
     z_score = normal_quantile(level)
     grid = mapping_grid(predictions)
     grid_estimates = full["model"].predict_many(grid)
@@ -325,6 +437,13 @@ def _build_target_result(
         curve_estimates=grid_estimates,
         method=method,
         n_folds=len(unique_folds),
+        blp_diagnostic=_build_blp_result(
+            predictions=predictions,
+            pseudo_outcome=pseudo_outcome,
+            sample_weight=sample_weight,
+            fold_ids=fold_ids,
+            level=level,
+        ),
         fold_estimates=fold_estimates,
     )
     if comparison_predictions is not None:
@@ -348,12 +467,8 @@ def _build_target_result(
                 fold_ids=[fold_ids[index] for index in keep],
             )
             comparison_fold_estimates.append(subset["estimate"])
-        mean_comp = sum(comparison_fold_estimates) / len(comparison_fold_estimates)
-        variance_comp = ((len(unique_folds) - 1.0) / len(unique_folds)) * sum(
-            (estimate - mean_comp) ** 2 for estimate in comparison_fold_estimates
-        )
         result.comparison_estimate = comparison["estimate"]
-        result.comparison_standard_error = variance_comp ** 0.5
+        result.comparison_standard_error = _jackknife_standard_error(comparison_fold_estimates)
     return result
 
 
@@ -479,6 +594,7 @@ def diagnose_calibration(
         method=primary.method,
         n_folds=primary.n_folds,
         target_population=target_population,
+        blp_diagnostic=primary.blp_diagnostic,
         overlap_diagnostics=overlap,
         fold_estimates=primary.fold_estimates,
         comparison_estimate=primary.comparison_estimate,

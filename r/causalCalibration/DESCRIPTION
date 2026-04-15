@@ -15,10 +15,9 @@ Encoding: UTF-8
 LazyData: false
 Depends:
     R (>= 4.1.0)
-Imports:
-    reticulate
 Suggests:
     knitr,
+    reticulate,
     rmarkdown,
     testthat (>= 3.0.0)
 VignetteBuilder: knitr

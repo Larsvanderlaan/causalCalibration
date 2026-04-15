@@ -30,6 +30,10 @@ Diagnostics do not take learner objects.
 - plugin estimate,
 - deterministic K-fold jackknife standard error,
 - confidence interval,
+- BLP-style weighted regression of pseudo-outcome on intercept plus score,
+- BLP intercept and slope estimates,
+- BLP p-values and confidence intervals,
+- a slope flag indicating whether the CATE coefficient CI excludes `0`,
 - optional raw-vs-calibrated comparison,
 - overlap diagnostics when propensity scores are supplied.
 
@@ -58,6 +62,18 @@ For `loss="r"` workflows, the overlap-targeted diagnostic is the natural compani
 
 # Reading the output
 
+## BLP slope
+
+The diagnostics object also reports a linear projection of the pseudo-outcome on
+an intercept and the input CATE score. This is the compact calibration-style
+linear diagnostic used in the Chernozhukov-style HTE evaluation literature.
+Its confidence intervals and p-values reuse the same `fold_ids` /
+`jackknife_folds` split as the main diagnostics output.
+
+- slope near `1`: the score is close to the right treatment-effect scale under a linear approximation
+- slope CI containing `0`: there is not strong evidence of effect heterogeneity along this score
+- slope CI excluding `0`: the score captures a non-flat treatment-effect signal
+
 ## Small calibration error
 
 This suggests the prediction rule is close to calibrated under the chosen target population and nuisance estimates.
@@ -83,6 +99,8 @@ diagnostics = diagnose_calibration(
     propensity=e_hat,
     target_population="both",
 )
+
+diagnostics.blp_diagnostic.summary()
 ```
 
 ```r
@@ -96,6 +114,8 @@ diagnostics <- diagnose_calibration(
   propensity = e_hat,
   target_population = "both"
 )
+
+summary(diagnostics$blp)
 ```
 
 # Important caveat
