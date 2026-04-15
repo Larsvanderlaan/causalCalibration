@@ -29,8 +29,8 @@ tau_calibrated = calibrator.predict(tau_hat_new)
 
 For the full workflow, see:
 
-- [docs/index.qmd](../docs/index.qmd)
-- [examples/python-workflow.ipynb](../examples/python-workflow.ipynb)
+- [package website](https://larsvanderlaan.github.io/causalCalibration/)
+- [Python workflow notebook](https://github.com/Larsvanderlaan/causalCalibration/blob/main/examples/python-workflow.ipynb)
 
 Interpretation note:
 

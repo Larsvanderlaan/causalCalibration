@@ -22,7 +22,7 @@ fit_calibrator(
 \item{treatment}{Numeric binary vector of treatment assignments.}
 \item{outcome}{Numeric vector of observed outcomes.}
 \item{loss}{Calibration loss, either \code{"dr"} or \code{"r"}.}
-\item{method}{Calibration backend: \code{"isotonic"}, \code{"smooth_isotonic"}, \code{"linear"}, or \code{"histogram"}.}
+\item{method}{Calibration backend: \code{"isotonic"}, \code{"monotone_spline"}, \code{"linear"}, or \code{"histogram"}.}
 \item{mu0}{Numeric vector of estimated control outcome regressions.}
 \item{mu1}{Numeric vector of estimated treated outcome regressions.}
 \item{outcome_mean}{Numeric vector of estimated marginal outcome means, used for \code{loss = "r"}.}

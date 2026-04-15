@@ -63,6 +63,6 @@ Standard calibration does not reconstruct fold-specific prediction behavior. If 
 
 # See also
 
-- [Cross-Calibration](cross-calibration.qmd)
-- [Losses and Methods](choosing-losses-and-methods.qmd)
-- [API Reference](reference.qmd)
+- [Cross-Calibration](cross-calibration.html)
+- [Losses and Methods](choosing-losses-and-methods.html)
+- [API Reference](reference.html)

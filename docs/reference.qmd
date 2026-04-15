@@ -54,7 +54,7 @@ Use for a calibration curve, a scalar error estimate, a linear BLP-style score d
 
 ### Interpretation
 
-The meaning of the result depends on the target population implied by your loss and nuisance structure. See [Losses and Methods](choosing-losses-and-methods.qmd).
+The meaning of the result depends on the target population implied by your loss and nuisance structure. See [Losses and Methods](choosing-losses-and-methods.html).
 
 ## `assess_overlap()`
 
