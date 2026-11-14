@@ -1,6 +1,6 @@
 # causalCalibration
 
-Production-ready causal calibration tooling for heterogeneous treatment effect models, with native R and Python packages, cross-calibration support, and doubly robust calibration diagnostics.
+Calibrate heterogeneous treatment-effect predictions in R and Python, use cross-fitted models, and estimate calibration error with confidence intervals.
 
 [Package Website](https://larsvanderlaan.github.io/causalCalibration/)
 

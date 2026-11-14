@@ -2,93 +2,49 @@
 title: "Diagnostics"
 ---
 
-# What diagnostics answer
+`diagnose_calibration()` estimates calibration error, reports a confidence interval, and compares raw and calibrated predictions. Supply predictions, treatment, outcome, and nuisance estimates for the same observations. Use cross-fitted nuisance estimates when possible.
 
-`diagnose_calibration()` estimates how far a prediction rule is from being calibrated under the package’s calibration-error framework.
+## Outputs
 
-Use it to answer:
+- A calibration curve.
+- A robust estimate of squared L2 calibration error and a plug-in estimate.
+- A K-fold jackknife standard error and confidence interval.
+- A best linear projection (BLP) of the treatment-effect pseudo-outcome on an intercept and the score, with coefficient estimates, intervals, and p-values.
+- An optional comparison with another prediction vector.
+- Propensity-score and effective-sample-size summaries.
 
-- Is my raw predictor visibly miscalibrated?
-- Did calibration improve things?
-- How uncertain is the estimated calibration error?
+## Target populations {#target-populations}
 
-# Inputs
+| `target_population` | Calibration error reported for |
+|---|---|
+| `"dr"` | The original study population, using a doubly robust pseudo-outcome |
+| `"overlap"` | The overlap-weighted population used by the R-loss |
+| `"both"` | Both populations, reported separately |
 
-Diagnostics take:
+For an R-loss fit, report the overlap-weighted diagnostic to assess calibration in the population used for fitting. You can also report the DR diagnostic to assess the same predictions in the original population.
 
-- a prediction vector,
-- treatment and outcome,
-- nuisance estimates,
-- and optionally a second prediction vector for before/after comparisons.
+## Read the results
 
-Diagnostics do not take learner objects.
+### Calibration error
 
-# Included outputs
+A small calibration error suggests that people with similar scores have an average treatment effect close to those scores, for the selected population. Read the estimate together with its confidence interval.
 
-- estimated calibration curve,
-- robust L2 calibration error estimate,
-- plugin estimate,
-- deterministic K-fold jackknife standard error,
-- confidence interval,
-- BLP-style weighted regression of pseudo-outcome on intercept plus score,
-- BLP intercept and slope estimates,
-- BLP p-values and confidence intervals,
-- a slope flag indicating whether the CATE coefficient CI excludes `0`,
-- optional raw-vs-calibrated comparison,
-- overlap diagnostics when propensity scores are supplied.
+Supply the raw scores as `comparison_predictions` to compare them with calibrated scores on the same evaluation observations.
 
-# Inference details
+### BLP intercept and slope
 
-Jackknife standard errors reuse supplied fold IDs when available. Otherwise the package builds deterministic balanced folds with `K = 100` by default.
+The BLP summarizes the linear relationship between the score and the treatment-effect pseudo-outcome. An intercept near `0` and a slope near `1` are consistent with calibration under this linear approximation. They do not establish calibration of the full curve.
 
-For the robust estimator, the package uses the paper's Eq. (2.4),
-`mean((Gamma_i - Delta_i) * (gamma_hat_oof(Delta_i) - Delta_i))`,
-with practical out-of-fold curve estimates:
+A slope confidence interval excluding `0` provides evidence of treatment-effect variation associated with the score. An interval containing `0` means the data do not establish such an association. The BLP intervals and p-values use the same jackknife folds as the calibration-error estimate.
 
-- `Gamma_i` is the DR or overlap-targeted pseudo-outcome, depending on `target_population`.
-- `linear` uses cheap exact leave-one-out updates.
-- `histogram` uses cheap within-bin leave-one-out corrections with fixed bin boundaries.
-- `isotonic` and `monotone_spline` use K-fold out-of-fold refits.
+## Example
 
-# Target populations
-
-Diagnostics can answer two different questions:
-
-- `target_population="dr"`: calibration in the original study population via the doubly robust target.
-- `target_population="overlap"`: calibration in the overlap-weighted population aligned with the R-loss target.
-- `target_population="both"`: return both summaries in one object.
-
-For `loss="r"` workflows, the overlap-targeted diagnostic is the natural companion summary. The DR diagnostic is useful when you want the same predictor evaluated for the original population.
-
-# Reading the output
-
-## BLP slope
-
-The diagnostics object also reports a linear projection of the pseudo-outcome on
-an intercept and the input CATE score. This is the compact calibration-style
-linear diagnostic used in the Chernozhukov-style HTE evaluation literature.
-Its confidence intervals and p-values reuse the same `fold_ids` /
-`jackknife_folds` split as the main diagnostics output.
-
-- slope near `1`: the score is close to the right treatment-effect scale under a linear approximation
-- slope CI containing `0`: there is not strong evidence of effect heterogeneity along this score
-- slope CI excluding `0`: the score captures a non-flat treatment-effect signal
-
-## Small calibration error
-
-This suggests the prediction rule is close to calibrated under the chosen target population and nuisance estimates.
-
-## Large calibration error
-
-This suggests the prediction scale is still not directly interpretable as an average treatment effect for units sharing the same score.
-
-## Before/after comparisons
-
-Use `comparison_predictions` to compare a raw predictor to a calibrated predictor on the same sample.
-
-# Example
+::: {.panel-tabset}
+### Python
 
 ```python
+from causal_calibration import diagnose_calibration
+
 diagnostics = diagnose_calibration(
     predictions=tau_cross_calibrated,
     comparison_predictions=tau_raw,
@@ -103,7 +59,11 @@ diagnostics = diagnose_calibration(
 diagnostics.blp_diagnostic.summary()
 ```
 
+### R
+
 ```r
+library(causalCalibration)
+
 diagnostics <- diagnose_calibration(
   predictions = tau_cross_calibrated,
   comparison_predictions = tau_raw,
@@ -118,6 +78,26 @@ diagnostics <- diagnose_calibration(
 summary(diagnostics$blp)
 ```
 
-# Important caveat
+:::
 
-Prefer cross-fitted nuisance estimates whenever possible.
+Here `tau_cross_calibrated` and `tau_raw` refer to the same evaluation observations as `a`, `y`, and the nuisance estimates.
+
+## Estimation details
+
+The robust estimator follows Equation (2.4) of [Xu and Yadlowsky (2022)](https://arxiv.org/abs/2203.13364):
+
+```text
+mean((Gamma_i - Delta_i) * (gamma_hat_oof(Delta_i) - Delta_i))
+```
+
+`Delta_i` is the input score, `Gamma_i` is the pseudo-outcome for the chosen population, and `gamma_hat_oof` is an out-of-fold estimate of the calibration curve. For the overlap target, the package uses the corresponding observation weights.
+
+Curve estimation depends on `curve_method`:
+
+- `linear` uses exact leave-one-out updates.
+- `histogram` uses within-bin leave-one-out corrections with fixed bin boundaries.
+- `isotonic` and `monotone_spline` use K-fold refits.
+
+The jackknife uses supplied `fold_ids` when available. Otherwise, it creates deterministic balanced folds with `jackknife_folds=100` by default.
+
+See [Losses and methods](choosing-losses-and-methods.html) for target-population choices and the [API reference](reference.html#diagnose_calibration) for inputs.

@@ -18,7 +18,8 @@ HAS_NOTEBOOK_DEPS = all(
 class DocsTests(unittest.TestCase):
     def test_static_docs_and_workflow_assets_exist(self) -> None:
         for relative_path in (
-            "docs/index.html",
+            "docs/index.qmd",
+            "docs/_quarto.yml",
             "docs/site.css",
             "docs/assets/causal-calibration-badge-mark.svg",
             "docs/assets/causal-calibration-badge.svg",
@@ -35,7 +36,7 @@ class DocsTests(unittest.TestCase):
 
     def test_static_site_mentions_core_workflows(self) -> None:
         with open(
-            os.path.join(REPO_ROOT, "docs", "index.html"),
+            os.path.join(REPO_ROOT, "docs", "index.qmd"),
             encoding="utf-8",
         ) as handle:
             page = handle.read()
@@ -43,7 +44,8 @@ class DocsTests(unittest.TestCase):
         self.assertIn("fit_cross_calibrator()", page)
         self.assertIn("diagnose_calibration()", page)
         self.assertIn("assess_overlap()", page)
-        self.assertIn("Cross vs Standard", page)
+        self.assertIn("standard-calibration.html", page)
+        self.assertIn("cross-calibration.html", page)
         self.assertIn("losses and methods", page.lower())
 
     def test_method_guide_contains_target_population_language_and_citations(self) -> None:

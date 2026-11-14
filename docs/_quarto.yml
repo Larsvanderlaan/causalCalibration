@@ -1,0 +1,68 @@
+project:
+  type: website
+  output-dir: _site
+  render:
+    - index.qmd
+    - getting-started.qmd
+    - standard-calibration.qmd
+    - cross-calibration.qmd
+    - choosing-losses-and-methods.qmd
+    - diagnostics.qmd
+    - reference.qmd
+  resources:
+    - assets/
+
+website:
+  title: causalCalibration
+  site-url: https://larsvanderlaan.github.io/causalCalibration/
+  description: Calibrate treatment-effect predictions and estimate calibration error in R and Python.
+  favicon: assets/causal-calibration-badge-mark.svg
+  search:
+    location: navbar
+    type: overlay
+  navbar:
+    background: light
+    collapse-below: lg
+    left:
+      - href: index.qmd
+        text: Overview
+      - href: getting-started.qmd
+        text: Get started
+      - text: Guides
+        menu:
+          - href: standard-calibration.qmd
+            text: Standard calibration
+          - href: cross-calibration.qmd
+            text: Cross-calibration
+          - href: choosing-losses-and-methods.qmd
+            text: Losses and methods
+      - href: diagnostics.qmd
+        text: Diagnostics
+      - href: reference.qmd
+        text: API
+    right:
+      - href: https://github.com/Larsvanderlaan/causalCalibration
+        text: GitHub
+  page-footer:
+    left: Causal calibration for heterogeneous treatment effects · R and Python
+    right:
+      - text: Paper
+        href: https://proceedings.mlr.press/v202/van-der-laan23a.html
+      - text: Report an issue
+        href: https://github.com/Larsvanderlaan/causalCalibration/issues
+
+format:
+  html:
+    theme: cosmo
+    css: site.css
+    toc: true
+    toc-title: On this page
+    toc-depth: 2
+    code-copy: true
+    code-overflow: scroll
+    anchor-sections: true
+    smooth-scroll: true
+    lang: en
+
+execute:
+  eval: false

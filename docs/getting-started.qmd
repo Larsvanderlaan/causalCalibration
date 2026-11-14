@@ -1,95 +1,127 @@
 ---
-title: "Getting Started"
+title: "Get started"
 ---
 
-# Installation
+## Installation
 
-Python:
+Install from GitHub, or clone the repository to run the examples locally.
+
+::: {.panel-tabset}
+### Python
 
 ```bash
-python3 -m pip install -e python
+python3 -m pip install "git+https://github.com/Larsvanderlaan/causalCalibration.git#subdirectory=python"
 ```
 
-R:
+For plotting, install the optional dependencies with `python3 -m pip install matplotlib`.
+
+### R
+
+```r
+install.packages("remotes")
+remotes::install_github(
+  "Larsvanderlaan/causalCalibration",
+  subdir = "r/causalCalibration"
+)
+```
+
+For `method="isotonic"`, also install `reticulate` and the Python package `lightgbm`:
+
+```r
+install.packages("reticulate")
+reticulate::py_install("lightgbm")
+```
+
+If you use an existing Python environment, configure `reticulate` to use the environment where `lightgbm` is installed.
+
+### From source
+
+```bash
+git clone https://github.com/Larsvanderlaan/causalCalibration.git
+cd causalCalibration
+python3 -m pip install -e 'python[plot]'
+```
+
+From the same directory, install the R package:
 
 ```r
 install.packages("r/causalCalibration", repos = NULL, type = "source")
 ```
+:::
 
-For `method="isotonic"` in R, install `reticulate` and make sure the active Python environment includes `lightgbm`.
+## Prepare the inputs
 
-# Mental model
+The package calibrates predictions from a treatment-effect model you have already fitted. Each row needs a prediction, a binary treatment indicator, an observed outcome, and nuisance estimates for the chosen loss.
 
-The package calibrates predictions from a learner you already have. Bring:
+| Input | Meaning |
+|---|---|
+| `predictions` | One treatment-effect prediction per observation |
+| `treatment`, `outcome` | Treatment coded as `0` or `1`, and observed outcome |
+| `mu0`, `mu1` | Estimated conditional outcome means under treatment `0` and `1`; required for `loss="dr"` |
+| `propensity` | Estimated probability of treatment `1` given covariates; required for both losses |
+| `outcome_mean` | Estimated conditional outcome mean given covariates; required for `loss="r"` |
+| `fold_predictions` | For cross-calibration, an `n × K` matrix with predictions from each fold-specific model |
+| `fold_ids` | Optional fold indices, numbered `1` through `K`, identifying each row's out-of-fold prediction |
 
-- a treatment-effect prediction vector,
-- observed treatment and outcome data,
-- nuisance estimates needed by the chosen loss,
-- and, for cross-calibration, a matrix of fold-specific predictions.
-- optionally, fold IDs that tell the package which column is the out-of-fold prediction for each observation.
+Use cross-fitted nuisance estimates when possible. In a randomized trial, you can supply the known treatment probability as `propensity`.
 
-## Workflow
+## Fit and predict
 
-1. Train or otherwise obtain a treatment-effect predictor.
-2. Compute the nuisance estimates required by the calibration loss.
-3. Decide whether you want standard calibration or cross-calibration.
-4. Fit the calibrator.
-5. Predict calibrated effect scores.
-6. Diagnose remaining miscalibration.
-7. Revisit the loss if overlap diagnostics suggest the original-population target is unstable.
+Start with `loss="dr"` when you want calibration for the original population and overlap is adequate. Use `method="isotonic"` for a nondecreasing step function. See [Losses and methods](choosing-losses-and-methods.html) for alternatives.
 
-# Which function should I use?
+The examples below assume `tau_hat` contains predictions on a calibration sample that was not used to train the treatment-effect model. All other fitting inputs refer to those same observations. `tau_new` contains predictions for new observations from the same treatment-effect model.
 
-## Use `fit_calibrator()` when
+::: {.panel-tabset}
+### Python
 
-- you have one prediction per observation,
-- ordinary calibration is enough for your workflow,
-- or you are calibrating on a separate calibration sample.
+```python
+from causal_calibration import fit_calibrator
 
-## Use `fit_cross_calibrator()` when
+cal = fit_calibrator(
+    predictions=tau_hat,
+    treatment=a,
+    outcome=y,
+    mu0=mu0_hat,
+    mu1=mu1_hat,
+    propensity=e_hat,
+    loss="dr",
+    method="isotonic",
+)
 
-- your learner produced cross-fitted predictions,
-- you want to fit and calibrate in sample,
-- and you have both pooled OOF predictions and fold-specific predictions.
+tau_calibrated = cal.predict(tau_new)
+```
 
-## Use `diagnose_calibration()` when
+### R
 
-- you want to quantify remaining calibration error,
-- compare raw and calibrated predictions,
-- check whether the score carries a non-flat treatment-effect signal through the BLP slope,
-- or understand whether your calibration choice is stable under your overlap conditions.
+```r
+library(causalCalibration)
 
-# Workflow objects at a glance
+cal <- fit_calibrator(
+  predictions = tau_hat,
+  treatment = a,
+  outcome = y,
+  mu0 = mu0_hat,
+  mu1 = mu1_hat,
+  propensity = e_hat,
+  loss = "dr",
+  method = "isotonic"
+)
 
-| Object | Meaning | Used by |
-|---|---|---|
-| `predictions` | One score per observation | `fit_calibrator`, `fit_cross_calibrator`, `diagnose_calibration` |
-| `fold_predictions` | `n x K` matrix of fold-specific predictions | `fit_cross_calibrator`, `predict(cross_calibrator, ...)` |
-| `fold_ids` | length `n` integer vector | `fit_cross_calibrator`, `validate_crossfit_bundle` |
-| `mu0`, `mu1`, `propensity` | DR-loss nuisance inputs | `loss="dr"` |
-| `outcome_mean`, `propensity` | R-loss nuisance inputs | `loss="r"` |
+tau_calibrated <- predict(cal, tau_new)
+```
+:::
 
-# First recommendation
+If your model was trained with cross-fitting, follow the [cross-calibration guide](cross-calibration.html) to use the full sample without setting aside a calibration split.
 
-For most users, start with:
+## Check calibration
 
-- `loss="dr"`
-- `method="isotonic"`
-- cross-calibration when cross-fitted predictions are available
+Use `diagnose_calibration()` to estimate remaining calibration error, obtain a confidence interval, and compare raw and calibrated scores. All predictions, outcomes, treatment indicators, and nuisance estimates must refer to the same evaluation observations. See [Diagnostics](diagnostics.html) for examples and interpretation.
 
-Then use diagnostics to check remaining calibration error, read the BLP slope CI, and see whether weak overlap suggests moving to `loss="r"` for a more overlap-focused target.
-`assess_overlap()` is the package's default screen for that decision; its thresholds are practical defaults, not universal rules.
+`assess_overlap()` summarizes propensity-score tails and effective sample sizes. Its recommendation can help you choose between the original and overlap-weighted populations; the screening cutoffs are practical defaults.
 
-# Workflow helpers
+## Full examples {#full-examples}
 
-If your upstream learner already produces vectors, fold matrices, and nuisance estimates, you can package them with:
+- [Python notebook](https://github.com/Larsvanderlaan/causalCalibration/blob/main/examples/python-workflow.ipynb): generate data, fit nuisance models, cross-calibrate, and compute diagnostics.
+- [R vignette](https://github.com/Larsvanderlaan/causalCalibration/blob/main/r/causalCalibration/vignettes/getting-started.Rmd): the corresponding analysis in R.
 
-- `calibration_bundle(...)` or `calibration_bundle_from_data_frame(...)`
-- `crossfit_bundle(...)` or `crossfit_bundle_from_data_frame(...)`
-
-Those helpers are optional. They make the downstream workflow easier to validate.
-
-# Full examples
-
-- Python notebook: [examples/python-workflow.ipynb](https://github.com/Larsvanderlaan/causalCalibration/blob/main/examples/python-workflow.ipynb)
-- R vignette: [r/causalCalibration/vignettes/getting-started.Rmd](https://github.com/Larsvanderlaan/causalCalibration/blob/main/r/causalCalibration/vignettes/getting-started.Rmd)
+Optional [bundle helpers](reference.html#bundle-helpers) collect predictions, nuisances, weights, and fold information in one object.

@@ -1,66 +1,66 @@
 ---
-title: "API Reference"
+title: "API reference"
+toc-depth: 3
 ---
 
-# Core fitting functions
+## Core fitting functions
 
-## `fit_calibrator()`
+### `fit_calibrator()`
 
-Use when you have one prediction per unit.
+Fit a single calibration map on predictions from a separate calibration sample.
 
-### Required by loss
+#### Required by loss
 
 - `loss="dr"`: `mu0`, `mu1`, `propensity`
 - `loss="r"`: `outcome_mean`, `propensity`
 
-### Common mistakes
+#### Common mistakes
 
 - supplying raw learner objects instead of prediction vectors,
 - forgetting `outcome_mean` for `loss="r"`,
 - using non-binary treatment indicators.
 
-## `fit_cross_calibrator()`
+### `fit_cross_calibrator()`
 
 Use for cross-fitted treatment-effect predictions.
 
-### Contract
+#### Prediction inputs
 
 - `predictions`: pooled out-of-fold predictions used to fit the calibration map
 - `fold_predictions`: `n x K` matrix used for calibrated aggregation at prediction time
-- `fold_ids`: optional out-of-fold column index per observation; when supplied, the package validates that pooled OOF predictions really match the designated fold-specific column.
+- `fold_ids`: optional out-of-fold column index per observation; when supplied, the package checks that each out-of-fold prediction matches the entry in its designated column.
 
-### Common mistakes
+#### Common mistakes
 
 - swapping `predictions` and `fold_predictions`,
-- passing a single-column matrix when the intended workflow is cross-calibration,
+- passing a single-column matrix instead of predictions from all fold-specific models,
 - forgetting that prediction later also expects a fold-specific matrix.
 
-### Validation helpers
+#### Validation helpers
 
 - `validate_crossfit_bundle(...)`: validate pooled OOF predictions, fold matrices, and optional fold IDs before fitting.
-- `crossfit_bundle(...)` / `crossfit_bundle_from_data_frame(...)`: package the cross-fit workflow objects in one place.
+- `crossfit_bundle(...)` / `crossfit_bundle_from_data_frame(...)`: collect predictions, nuisance estimates, and fold information in one object.
 
-## `diagnose_calibration()`
+### `diagnose_calibration()` {#diagnose_calibration}
 
-Use for a calibration curve, a scalar error estimate, a linear BLP-style score diagnostic, and uncertainty quantification.
+Estimate a calibration curve and squared L2 calibration error, and report confidence intervals and a best linear projection of the pseudo-outcome on the score.
 
-### Inputs
+#### Inputs
 
-- prediction vector,
-- treatment and outcome,
-- nuisance estimates,
+- `predictions`, `treatment`, `outcome`, `mu0`, `mu1`, and `propensity`,
+- `outcome_mean` for the overlap target (if omitted, computed from `mu0`, `mu1`, and `propensity`),
 - optional comparison vector,
 - optional `target_population = "dr" | "overlap" | "both"`.
 
-### Interpretation
+#### Interpretation
 
-The meaning of the result depends on the target population implied by your loss and nuisance structure. See [Losses and Methods](choosing-losses-and-methods.html).
+Select the original or overlap-weighted population with `target_population`. See [Diagnostics](diagnostics.html) for interpretation.
 
-## `assess_overlap()`
+### `assess_overlap()`
 
-Use for the package's default overlap screen before choosing `loss="dr"` versus `loss="r"`.
+Summarize propensity-score tails and effective sample sizes before choosing a calibration loss.
 
-### Outputs
+#### Outputs
 
 - propensity min/max,
 - tail fractions below `0.05`, `0.10`, above `0.90`, `0.95` used by the default screen,
@@ -69,34 +69,34 @@ Use for the package's default overlap screen before choosing `loss="dr"` versus 
 - overlap-weight effective sample size,
 - severity label and recommended loss under the package defaults.
 
-Treat those cutoffs as workflow heuristics built into the package, not as universal overlap thresholds.
+The severity label and loss recommendation use practical screening cutoffs. Choose the target population based on your scientific question.
 
-## Bundle helpers
+### Bundle helpers {#bundle-helpers}
 
 - `calibration_bundle(...)` / `calibration_bundle_from_data_frame(...)`
 - `crossfit_bundle(...)` / `crossfit_bundle_from_data_frame(...)`
 - `fit_bundle_calibrator(...)`
 - `fit_bundle_cross_calibrator(...)`
 
-# Object behavior
+## Fitted objects
 
-## `Calibrator`
+### `Calibrator`
 
 - `predict(...)`: apply the fitted calibration map
-- `summary()`: lightweight metadata summary
+- `summary()`: fitting options and sample size
 - plotting: visualize the fitted calibration map
 
-## `CrossCalibrator`
+### `CrossCalibrator`
 
 - `predict(...)`: apply the map to a fold-specific matrix and aggregate with the order-statistic median
 - `summary()`: metadata summary including fold count
 
-## `CalibrationDiagnostics`
+### `CalibrationDiagnostics`
 
 - `summary()`: scalar results, BLP slope/intercept summaries, and intervals
-- plotting helpers: calibration-curve outputs for visualization
+- plotting helpers: display the estimated calibration curve
 
-# Reference examples
+## Full examples
 
-- Python workflow notebook: [examples/python-workflow.ipynb](https://github.com/Larsvanderlaan/causalCalibration/blob/main/examples/python-workflow.ipynb)
+- Python notebook: [examples/python-workflow.ipynb](https://github.com/Larsvanderlaan/causalCalibration/blob/main/examples/python-workflow.ipynb)
 - R vignette: [r/causalCalibration/vignettes/getting-started.Rmd](https://github.com/Larsvanderlaan/causalCalibration/blob/main/r/causalCalibration/vignettes/getting-started.Rmd)

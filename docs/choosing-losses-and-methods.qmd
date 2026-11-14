@@ -1,82 +1,44 @@
 ---
-title: "Choosing Losses and Methods"
+title: "Losses and methods"
 ---
 
-# What population is being calibrated?
+The loss determines the population for which predictions are calibrated. The method determines the form of the calibration map.
 
-## `loss="dr"`
+## Choose the population
 
-`loss="dr"` calibrates to the original study population.
+### Doubly robust loss: `loss="dr"`
 
-However, the DR-loss relies on inverse-propensity weighting. That makes it more sensitive when overlap is weak or propensities get close to `0` or `1`.
+Use the doubly robust loss to calibrate predictions for the original study population. Supply the propensity score and the conditional outcome means under each treatment as `propensity`, `mu0`, and `mu1`.
 
-- target: original / observed population
-- strength: direct population-level interpretation
-- caveat: inverse-propensity weighting can become unstable under poor overlap
+The loss uses inverse-propensity weighting, which can lead to unstable estimates when treatment probabilities are close to `0` or `1`. This is the construction used in [van der Laan et al. (2023)](https://proceedings.mlr.press/v202/van-der-laan23a.html) and the DR-learner literature; see [Kennedy (2020)](https://doi.org/10.48550/arXiv.2004.14497).
 
-This aligns with the doubly robust treatment-effect construction used in the causal calibration paper and DR-learner literature, including [van der Laan et al. (2023)](https://proceedings.mlr.press/v202/van-der-laan23a.html) and [Kennedy (2020)](https://doi.org/10.48550/arXiv.2004.14497).
+### Residualized loss: `loss="r"`
 
-## `loss="r"`
+Use the R-loss to calibrate predictions for an overlap-weighted population. Supply the propensity score and the conditional outcome mean given covariates as `propensity` and `outcome_mean`.
 
-`loss="r"` calibrates using the R-loss weighting induced by `(A - e(W))^2`. That means the calibration problem places more emphasis on observations in the overlap or equipoise region.
+The squared treatment residual, `(A - e(W))²`, weights the calibration loss. At the true propensity score, its conditional expectation is `e(W)(1 - e(W))`, so calibration gives more weight to people whose treatment probabilities are closer to one half. This follows the R-learner construction of [Nie and Wager (2021)](https://academic.oup.com/biomet/article/108/2/299/5911092).
 
-This is often more robust when overlap is weak, but it changes the target: the calibrated scores apply to an overlap-weighted population rather than the original study population.
+This weighting can improve stability under weak overlap, but the calibrated scores describe a different population. Choose this target only if it answers your scientific question.
 
-- target: overlap-weighted population
-- strength: often more robust under weak overlap
-- caveat: the target population is no longer the original observed population
+### Check overlap
 
-This interpretation follows the R-learner weighting structure of [Nie and Wager (2021)](https://academic.oup.com/biomet/article/108/2/299/5911092). In the documentation, treat this as a consequence of the weighting scheme, not as a package-specific redefinition of calibration.
+Start with `dr` when you want calibration for the original population and overlap is adequate. Use `assess_overlap()` to inspect propensity-score tails, clipping, and effective sample sizes. Its severity labels and loss recommendation use practical screening cutoffs.
 
-## Short recommendation
+When reporting diagnostics for an R-loss fit, use `target_population="overlap"` or `"both"` to include calibration error for the population used in fitting. See [Diagnostics](diagnostics.html#target-populations).
 
-> Default package recommendation: start with `dr` when original-population targeting is the goal and overlap looks adequate. Move to `r` when the package's overlap screen flags weak overlap and an overlap-weighted target is acceptable.
+## Choose a calibration method
 
-# Choosing a calibration method
+| Method | Fitted map | When to use it |
+|---|---|---|
+| `isotonic` | Nondecreasing step function | Default for flexible monotone calibration |
+| `monotone_spline` | Smooth nondecreasing spline | When you want a smooth calibration curve |
+| `linear` | Intercept and nonnegative slope | When a simple shift and rescaling are adequate |
+| `histogram` | Constant within each score bin | For binwise calibration or a diagnostic comparison |
 
-## `isotonic`
+The package implements `isotonic` with a single monotone LightGBM regression tree. It supports observation weights, minimum leaf size through `min_child_samples`, and constant predictions beyond the observed score range. The R implementation uses `lightgbm` through `reticulate`.
 
-Best default when you want a monotone nonparametric calibration map with minimal assumptions.
+`monotone_spline` uses nonnegative derivative coefficients and a smoothness penalty. Pass tuning options through `method_options`.
 
-In `causalCalibration`, `isotonic` is implemented with a single monotone LightGBM regression tree. That gives you:
+## Choose standard calibration or cross-calibration
 
-- monotone weighted fitting,
-- a practical `min_child_samples` control,
-- and flat extrapolation beyond the observed score range.
-
-## `monotone_spline`
-
-Use when you want a smooth monotone map rather than a piecewise-constant one.
-
-This method uses a monotone spline fit with nonnegative derivative coefficients and a smoothness penalty.
-
-## `linear`
-
-Use when you want a simple parametric recalibration step and easy interpretation.
-
-## `histogram`
-
-Use when you want a coarse, transparent piecewise-constant map or a simple diagnostic baseline.
-
-# Choosing standard calibration vs cross-calibration
-
-## Prefer standard calibration when
-
-- you already have a clean calibration sample,
-- or you only have one prediction per unit.
-
-## Prefer cross-calibration when
-
-- your learner was trained with cross-fitting,
-- you have pooled OOF predictions and fold-specific predictions,
-- and you want to fit and calibrate in sample without a separate holdout calibration split.
-
-# Diagnostics and overlap
-
-If overlap is weak, diagnostics should be interpreted together with the loss choice:
-
-- a `dr` diagnostic targets the original population but may be noisier because of inverse-propensity behavior,
-- an `r` fit may be more stable in overlap-poor regions, but its calibrated scores answer a different target-population question,
-- `assess_overlap()` gives a quick severity label plus a default loss recommendation before you fit anything.
-
-The `assess_overlap()` severity labels use package-default screening rules based on propensity tails, clipping, and IPW effective sample size. Treat them as workflow defaults rather than universal cutoffs.
+Use [standard calibration](standard-calibration.html) with predictions on a separate calibration sample. Use [cross-calibration](cross-calibration.html) when you have pooled out-of-fold predictions and a matrix of predictions from each fold-specific model.

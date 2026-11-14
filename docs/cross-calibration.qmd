@@ -1,42 +1,28 @@
 ---
-title: "Cross-Calibration"
+title: "Cross-calibration"
 ---
 
-# When to use cross-calibration
+## When to use it
 
-Cross-calibration is the main workflow when your upstream treatment-effect model was trained with cross-fitting.
+Use `fit_cross_calibrator()` when your treatment-effect model was trained with cross-fitting. Fit the calibration map using pooled out-of-fold predictions, then apply it to predictions from every fold-specific model. This uses the full sample without a separate calibration split.
 
-It lets you fit and calibrate in sample without spending a separate holdout calibration set.
+For each fold, train the treatment-effect model without that fold's observations. Save its predictions for all observations, not only its held-out fold.
 
-# What “fit and calibrate in sample” means
+## Prepare the inputs
 
-It means:
-
-- all observations contribute to the overall workflow,
-- but the prediction objects used in calibration still respect the fold structure of the upstream learner,
-- so the final calibrated predictions are assembled from fold-specific predictions rather than from a single overfit in-sample score.
-
-# Required objects
-
-| Object | Shape | Role |
+| Input | Shape | Use |
 |---|---|---|
-| `predictions` | length `n` | pooled out-of-fold predictions used to fit the calibration map |
-| `fold_predictions` | `n x K` | one column per fold-specific predictor, used for calibrated aggregation |
-| nuisance inputs | length `n` | required by the chosen loss |
+| `predictions` | Length `n` | One out-of-fold prediction per observation, used to fit the map |
+| `fold_predictions` | `n × K` | Column `k` contains predictions from the model trained without fold `k` |
+| `fold_ids` | Length `n`, optional | Indices `1` through `K` identifying the held-out fold for each observation |
+| Treatment, outcome, and nuisance estimates | Length `n` each | Inputs required by the chosen loss |
 
-# Step-by-step workflow
+Supply `fold_ids` to check that each pooled prediction equals the entry in its designated column of `fold_predictions`.
 
-```mermaid
-flowchart LR
-  A["Cross-fitted HTE learner"] --> B["Pooled OOF predictions"]
-  A --> C["Fold-specific prediction matrix (n x K)"]
-  B --> D["fit_cross_calibrator(...)"]
-  C --> E["predict(cross_calibrator, fold_predictions)"]
-  D --> E
-  E --> F["Cross-calibrated in-sample predictions"]
-```
+## Fit and predict
 
-## Python
+::: {.panel-tabset}
+### Python
 
 ```python
 from causal_calibration import fit_cross_calibrator, validate_crossfit_bundle
@@ -63,9 +49,11 @@ cross_calibrator = fit_cross_calibrator(
 tau_cross_calibrated = cross_calibrator.predict(tau_fold_matrix)
 ```
 
-## R
+### R
 
 ```r
+library(causalCalibration)
+
 validate_crossfit_bundle(
   predictions = tau_oof,
   fold_predictions = tau_fold_matrix,
@@ -88,28 +76,24 @@ cross_calibrator <- fit_cross_calibrator(
 tau_cross_calibrated <- predict(cross_calibrator, tau_fold_matrix)
 ```
 
-# How aggregation works
+:::
 
-Version 1 aggregates calibrated fold-specific predictions with the order-statistic median.
+## Combine predictions
 
-# In-sample vs out-of-sample
+The package fits one map on the pooled out-of-fold scores, applies it to each column of `fold_predictions`, and takes the median in each row. For an even number of columns, it uses the lower of the two middle values.
 
-## In-sample cross-calibrated predictions
+For predictions on the training observations, supply the original `n × K` matrix. For a new sample of size `m`, apply each fold-specific treatment-effect model to the new observations and supply the resulting `m × K` matrix, keeping the same column order.
 
-Use the same `n x K` fold-prediction matrix built for the training observations.
+## Common mistakes
 
-## Out-of-sample predictions
+- Using fitted in-sample scores in `predictions` instead of out-of-fold scores.
+- Passing a vector to `predict()` instead of the full matrix of fold-specific predictions.
+- Changing the column order between fitting and prediction.
+- Omitting `fold_ids` when you want the package to check out-of-fold alignment.
 
-For a new sample, build the same kind of `m x K` matrix by applying each fold-specific predictor to the new observations, then pass that matrix to `predict(cross_calibrator, ...)`.
+## Full examples
 
-# Common mistakes
+- [Python notebook](https://github.com/Larsvanderlaan/causalCalibration/blob/main/examples/python-workflow.ipynb)
+- [R vignette](https://github.com/Larsvanderlaan/causalCalibration/blob/main/r/causalCalibration/vignettes/getting-started.Rmd)
 
-- Passing a single prediction vector to `fit_cross_calibrator()` instead of pooled OOF predictions.
-- Passing only one calibrated prediction column instead of the full fold-specific matrix.
-- Forgetting that `fit_cross_calibrator()` fits on `predictions` but predicts from `fold_predictions`.
-- Skipping `fold_ids` when you actually want the package to verify pooled OOF alignment against the fold matrix.
-
-# Full walkthroughs
-
-- Python notebook: [examples/python-workflow.ipynb](https://github.com/Larsvanderlaan/causalCalibration/blob/main/examples/python-workflow.ipynb)
-- R vignette: [r/causalCalibration/vignettes/getting-started.Rmd](https://github.com/Larsvanderlaan/causalCalibration/blob/main/r/causalCalibration/vignettes/getting-started.Rmd)
+See [Diagnostics](diagnostics.html) to assess the calibrated predictions, or the [API reference](reference.html) for argument requirements.
