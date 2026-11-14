@@ -9,6 +9,9 @@ on:
 permissions:
   contents: read
 
+env:
+  USE_BUNDLED_LIBUV: "1"
+
 jobs:
   python:
     runs-on: ubuntu-latest
